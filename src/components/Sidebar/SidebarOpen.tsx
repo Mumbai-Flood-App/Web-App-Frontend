@@ -15,8 +15,8 @@ const SidebarOpen = ({ onToggle }: { onToggle: () => void }) => (
     </div>
     {/* Middle */}
     <div className="flex flex-col items-start gap-[12px] pl-6">
-      <FloodModelIcon open />
       <RainfallIcon open />
+      <FloodModelIcon open />
       <WaterLevelIcon open />
       <RailwayIcon open />
       <FloodReportIcon open />

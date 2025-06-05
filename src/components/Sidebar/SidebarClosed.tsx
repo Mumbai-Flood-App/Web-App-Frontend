@@ -15,8 +15,8 @@ const SidebarClosed = ({ onToggle }: { onToggle: () => void }) => (
     </div>
     {/* Middle */}
     <div className="flex flex-col items-center gap-[12px]">
-      <FloodModelIcon />
       <RainfallIcon />
+      <FloodModelIcon />
       <WaterLevelIcon />
       <RailwayIcon />
       <FloodReportIcon />

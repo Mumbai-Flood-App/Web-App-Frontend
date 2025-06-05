@@ -12,7 +12,7 @@ const InfoIcon = ({ open }: { open?: boolean }) => {
         <span className={`absolute top-[8px] left-[49px] font-medium ${isActive ? 'text-white' : 'text-[#8dadff]'}`}>About</span>
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[28.57%] h-[36px] overflow-hidden">
           <Image
-            src={isActive ? '/icons/info-white.svg' : '/icons/info.svg'}
+            src={isActive ? '/icons/info-open-white.svg' : '/icons/info-open.svg'}
             alt="About"
             width={36}
             height={36}
@@ -28,7 +28,7 @@ const InfoIcon = ({ open }: { open?: boolean }) => {
           width={36}
           height={36}
           alt="About"
-          src={isActive ? '/icons/info-white.svg' : '/icons/info.svg'}
+          src={isActive ? '/icons/info-closed-white.svg' : '/icons/info.svg'}
           className="object-contain absolute top-0 left-0 w-[36px] h-[36px]"
         />
       </div>

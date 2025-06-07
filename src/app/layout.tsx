@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Mumbai Flood",
-  description: "Mumbai Flood Monitoring System",
+  description: "Mumbai Flood Experiment",
 };
 
 export default function RootLayout({

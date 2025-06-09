@@ -23,7 +23,7 @@ export default function LeafletMap() {
   const [stations, setStations] = useState<Station[]>([]);
 
   useEffect(() => {
-    fetch('https://api.mumbaiflood.in/aws/stations/')
+    fetch('/api/proxy-stations')
       .then(res => res.json())
       .then(setStations)
       .catch(console.error);

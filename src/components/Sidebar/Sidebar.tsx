@@ -1,16 +1,22 @@
+// src/components/Sidebar.tsx
 "use client";
-import { useState } from 'react';
-import SidebarOpen from './SidebarOpen';
-import SidebarClosed from './SidebarClosed';
+import { useState } from "react";
+import SidebarOpen from "./SidebarOpen";
+import SidebarClosed from "./SidebarClosed";
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true); // default: open
+type SidebarProps = {
+  isOpen?: boolean;
+  setIsOpen?: (open: boolean) => void;
+};
+
+export default function Sidebar(props: SidebarProps) {
+  const [internalOpen, setInternalOpen] = useState(true);
+  const isOpen = props.isOpen !== undefined ? props.isOpen : internalOpen;
+  const setIsOpen = props.setIsOpen || setInternalOpen;
 
   return isOpen ? (
     <SidebarOpen onToggle={() => setIsOpen(false)} />
   ) : (
     <SidebarClosed onToggle={() => setIsOpen(true)} />
   );
-};
-
-export default Sidebar;
+}

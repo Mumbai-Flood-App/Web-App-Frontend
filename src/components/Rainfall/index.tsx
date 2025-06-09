@@ -1,7 +1,14 @@
+'use client';
+import dynamic from 'next/dynamic';
+import Legend from './Legend';
+
+const LeafletMap = dynamic(() => import('./LeafletMap'), { ssr: false });
+
 export default function Rainfall() {
   return (
-    <div>
-      <h1>Rainfall Page</h1>
-    </div>
+    <>
+      <LeafletMap />
+      <Legend />
+    </>
   );
-} 
+}

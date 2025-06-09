@@ -2,14 +2,15 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar/Sidebar";
 import MobileNav from "@/components/MobileNav/MobileNav";
+import FooterLogos from "@/components/FooterLogos";
+import ClientLayout from "@/components/ClientLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Mumbai Flood",
-  description: "Mumbai Flood Experiment",
+  description: "Mumbai Flood Monitoring System",
 };
 
 export default function RootLayout({
@@ -20,20 +21,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-[#0F0F0F] text-white`}>
-        <div className="flex min-h-screen">
-          {/* Sidebar - hidden on mobile */}
-          <div className="hidden lg:block">
-            <Sidebar />
+        <ClientLayout>
+          <div className="flex min-h-screen w-screen overflow-hidden">
+            {/* Main content */}
+            <main className="flex-1 h-screen w-full overflow-hidden">
+              {children}
+            </main>
+            {/* Mobile Navigation - shown only on mobile */}
+            <MobileNav />
           </div>
-          
-          {/* Main content */}
-          <main className="flex-1 p-4 lg:p-8">
-            {children}
-          </main>
-
-          {/* Mobile Navigation - shown only on mobile */}
-          <MobileNav />
-        </div>
+          <FooterLogos />
+        </ClientLayout>
       </body>
     </html>
   );

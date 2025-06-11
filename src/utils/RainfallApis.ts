@@ -9,7 +9,7 @@ interface Station {
   
   export const fetchStations = async (): Promise<Station[]> => {
     try {
-      const response = await fetch('https://api.mumbaiflood.in/aws/stations/');
+      const response = await fetch('/api/proxy-stations');
       if (!response.ok) {
         throw new Error('Failed to fetch stations');
       }
@@ -22,7 +22,7 @@ interface Station {
   
   export const fetchStationData = async (stationId: number) => {
     try {
-      const response = await fetch(`https://api.mumbaiflood.in/aws/stations/${stationId}/`);
+      const response = await fetch(`/api/proxy-station-data/${stationId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch station data');
       }
@@ -35,7 +35,7 @@ interface Station {
   
   export const fetchObservedRainfall = async (stationId: number) => {
     try {
-      const response = await fetch(`https://api.mumbaiflood.in/aws/stations/${stationId}/rawdata/`);
+      const response = await fetch(`/api/proxy-rawdata/${stationId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch observed rainfall data');
       }

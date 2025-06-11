@@ -23,7 +23,7 @@ export default function StationSelector({ selected, onChange }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch('https://api.mumbaiflood.in/aws/stations/')
+    fetch('/api/proxy-stations')
       .then(res => res.json())
       .then((data: Station[]) => {
         setStations(data);

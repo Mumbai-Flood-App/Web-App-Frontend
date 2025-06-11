@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, TooltipProps } from 'recharts';
 import { fetchObservedRainfall } from '../../utils/RainfallApis';
 
 interface ObservedDataPoint {
@@ -19,6 +19,12 @@ interface Station {
 
 interface Props {
   selectedStation: Station | null;
+}
+
+interface PayloadItem {
+  value?: number;
+  name: string;
+  payload: ObservedDataPoint;
 }
 
 export default function TimeSeriesChart({ selectedStation }: Props) {
@@ -78,8 +84,11 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
     return indices.map(index => data[index].timestamp);
   };
 
-  const CustomTooltip = ({ active, payload, label }: { active: boolean; payload: any[]; label: string }) => {
-    if (active && payload && payload.length) {
+  const CustomTooltip = ({ active, payload, label }: { 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    active?: boolean; payload?: any[]; label?: string;
+  }) => {
+    if (active && payload && payload.length && label) {
       return (
         <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
           <p className="text-gray-300 text-sm font-bold">{formatTime(label)}</p>

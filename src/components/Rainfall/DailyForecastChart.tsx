@@ -23,6 +23,15 @@ interface Props {
   selectedStation: Station | null;
 }
 
+interface PayloadItem {
+  payload?: {
+    isForecasted: boolean;
+    predicted: number;
+    observed: number;
+    predictedStar: number;
+  };
+}
+
 export default function DailyForecastChart({ selectedStation }: Props) {
   const [dailyData, setDailyData] = useState<DailyDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
@@ -90,9 +99,10 @@ export default function DailyForecastChart({ selectedStation }: Props) {
       });
   }, [selectedStation]);
 
-  const CustomTooltip = ({ active, payload, label }: { active: boolean; payload: any[]; label: string }) => {
+  const CustomTooltip = ({ active, payload, label }: { active: boolean; payload: PayloadItem[]; label: string }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      if (!data) return null;
       
       return (
         <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">

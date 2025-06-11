@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, TooltipProps } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { fetchObservedRainfall } from '../../utils/RainfallApis';
 
 interface ObservedDataPoint {
@@ -19,12 +19,6 @@ interface Station {
 
 interface Props {
   selectedStation: Station | null;
-}
-
-interface PayloadItem {
-  value?: number;
-  name: string;
-  payload: ObservedDataPoint;
 }
 
 export default function TimeSeriesChart({ selectedStation }: Props) {

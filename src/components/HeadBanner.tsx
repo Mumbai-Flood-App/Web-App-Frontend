@@ -1,6 +1,6 @@
 // src/components/HeadBanner.tsx
 export default function HeadBanner({ sidebarOpen = true }: { sidebarOpen?: boolean }) {
-  const width = "w-[400px]";
+  const width = "w-[445px]";
   const fontSize = "text-lg";
   const marginLeft = sidebarOpen ? "lg:ml-[248px]" : "lg:ml-[90px]";
 

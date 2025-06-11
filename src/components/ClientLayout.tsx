@@ -3,6 +3,7 @@
 import { useState } from "react";
 import HeadBanner from "./HeadBanner";
 import Sidebar from "./Sidebar/Sidebar";
+import { usePathname } from "next/navigation";
 
 export default function ClientLayout({
   children,
@@ -10,10 +11,12 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const pathname = usePathname();
+  const showBanner = !pathname.startsWith("/about");
 
   return (
     <>
-      <HeadBanner sidebarOpen={isSidebarOpen} />
+      {showBanner && <HeadBanner sidebarOpen={isSidebarOpen} />}
       <div className="flex min-h-screen w-screen overflow-hidden">
         {/* Sidebar - hidden on mobile */}
         <div className="hidden lg:block h-screen z-10">

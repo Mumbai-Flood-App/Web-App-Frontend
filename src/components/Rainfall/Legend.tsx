@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react';
+
 const LEGEND = [
     { color: "bg-gray-400", label: "No Rain (0 mm)" },
     { color: "bg-green-300", label: "Light Rainfall (0.1 - 15.5 mm)" },
@@ -8,11 +10,27 @@ const LEGEND = [
   ];
   
   export default function Legend() {
+    const [date, setDate] = useState<string>('');
+
+    useEffect(() => {
+      // Get tomorrow's date
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const formattedDate = tomorrow.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+      setDate(formattedDate);
+    }, []);
+
     return (
       <div className="fixed bottom-6 left-180 z-30">
-        <div className="relative w-[290px] h-[170px] rounded-lg bg-black bg-opacity-90 backdrop-blur-[25px] p-4 text-xs text-white shadow-lg">
+        <div className="relative w-[290px] h-[190px] rounded-lg bg-black bg-opacity-90 backdrop-blur-[25px] p-4 text-xs text-white shadow-lg">
           <div className="absolute inset-0 rounded-lg bg-black bg-opacity-90 pointer-events-none" />
           <div className="relative z-10 flex flex-col gap-2">
+            <div className="font-bold mb-1">Rainfall Forecast {date ? `(${date})` : ''}</div>
             {LEGEND.map((item, i) => (
               <div key={i} className="flex items-center gap-2">
                 <span className={`inline-block w-4 h-4 rounded-full border border-white ${item.color}`} />

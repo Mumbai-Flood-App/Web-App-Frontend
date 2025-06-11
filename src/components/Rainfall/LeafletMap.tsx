@@ -1,5 +1,5 @@
 'use client';
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useEffect, useState } from 'react';
@@ -63,7 +63,9 @@ export default function LeafletMap() {
             fillColor={getColor(station.rainfall)}
             fillOpacity={1}
           >
-            <Popup>{station.name}</Popup>
+            <Tooltip permanent={false} direction="top" offset={[0, -10]}>
+              {station.name} ({station.rainfall.toFixed(2)} mm)
+            </Tooltip>
           </CircleMarker>
         ))}
       </MapContainer>

@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const response = await fetch(`https://api.mumbaiflood.in/aws/stations/${params.id}/`);
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const id = url.pathname.split('/').filter(Boolean).pop();
+  const response = await fetch(`https://api.mumbaiflood.in/aws/stations/${id}/`);
   const data = await response.json();
   return NextResponse.json(data);
 } 

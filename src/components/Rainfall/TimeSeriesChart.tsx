@@ -36,7 +36,7 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
     setError(null);
     
     fetchObservedRainfall(selectedStation.station_id)
-    .then((response: any) => {
+    .then((response: ObservedDataPoint[]) => {
       setData(response);
       setLoading(false);
     })
@@ -78,7 +78,7 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
     return indices.map(index => data[index].timestamp);
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active: boolean; payload: any[]; label: string }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
@@ -156,7 +156,12 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
             axisLine={{ stroke: '#4b5563', strokeWidth: 2 }}
             tickLine={false}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={({ active, payload, label }) => {
+            if (active && payload && payload.length) {
+              return <CustomTooltip active={active} payload={payload} label={label} />;
+            }
+            return null;
+          }} />
           <Area 
             type="monotone" 
             dataKey="rainfall" 

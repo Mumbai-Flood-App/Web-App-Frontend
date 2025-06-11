@@ -3,9 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { useStation } from '../../contexts/StationContext';
 import { fetchStationData } from '../../utils/RainfallApis';
 
+interface StationData {
+  rainfall: number;
+  station_id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  // Add other properties as needed
+}
+
 export default function RainfallWidget() {
   const { selectedStation } = useStation();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<StationData | null>(null);
   const [time, setTime] = useState('');
 
   // Time update - exactly like your old code
@@ -31,7 +40,7 @@ export default function RainfallWidget() {
   useEffect(() => {
     if (selectedStation) {
       fetchStationData(selectedStation.station_id)
-        .then(data => {
+        .then((data: StationData) => {
           console.log('Station data received:', data);
           setData(data);
         })

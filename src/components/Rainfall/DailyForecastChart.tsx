@@ -57,12 +57,12 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     setError(null);
     
     fetchStationData(selectedStation.station_id)
-      .then((response: any) => {
+      .then((response: { daily_data: DailyDataPoint[] }) => {
         console.log('Daily forecast response:', response);
         const dailyApiData = response.daily_data || [];
         
         // Replicate the exact logic from your React code
-        const combinedData = dailyApiData.map((item: any, index: number) => {
+        const combinedData = dailyApiData.map((item: DailyDataPoint, index: number) => {
           const dateLabel = formatDateToIST(item.date);
           const observed = index < dailyApiData.length - 3 ? item.observed : 0; // Show observed for all but the last three
           const predicted = index < dailyApiData.length - 3 ? 0 : item.predicted; // Show predicted bar for the last three entries only
@@ -90,7 +90,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
       });
   }, [selectedStation]);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active: boolean; payload: any[]; label: string }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       
@@ -202,7 +202,12 @@ export default function DailyForecastChart({ selectedStation }: Props) {
             tickLine={false}
           />
           
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={({ active, payload, label }) => {
+            if (active && payload && payload.length) {
+              return <CustomTooltip active={active} payload={payload} label={label} />;
+            }
+            return null;
+          }} />
           
           {/* Observed data bars (past days) */}
           <Bar dataKey="observed" name="Observed" radius={[2, 2, 0, 0]}>

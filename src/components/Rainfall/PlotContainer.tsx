@@ -15,7 +15,6 @@ interface Station {
 }
 
 export default function PlotContainer({ sidebarOpen = true }: { sidebarOpen?: boolean }) {
-  const [stations, setStations] = useState<Station[]>([]);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [currentDate, setCurrentDate] = useState('');
   const [currentTime, setCurrentTime] = useState('');
@@ -25,7 +24,6 @@ export default function PlotContainer({ sidebarOpen = true }: { sidebarOpen?: bo
     fetch('/api/proxy-stations')
       .then(res => res.json())
       .then((data: Station[]) => {
-        setStations(data);
         const sWard = data.find(station => station.name.toLowerCase().includes('s ward'));
         if (sWard) setSelectedStation(sWard);
       });

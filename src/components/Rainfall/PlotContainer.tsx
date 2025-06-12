@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import StationSelector from "./StationSelector";
 import TimeSeriesChart from "./TimeSeriesChart";
 import DailyForecastChart from "./DailyForecastChart";
+
 interface Station {
   id: number;
   station_id: number;
@@ -13,7 +14,7 @@ interface Station {
   rainfall: number;
 }
 
-export default function PlotContainer() {
+export default function PlotContainer({ sidebarOpen = true }: { sidebarOpen?: boolean }) {
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [currentDate, setCurrentDate] = useState('');
   const [currentTime, setCurrentTime] = useState('');
@@ -46,9 +47,11 @@ export default function PlotContainer() {
     return () => clearInterval(interval);
   }, []);
 
+  const marginLeft = sidebarOpen ? "lg:ml-[248px]" : "lg:ml-[90px]";
+
   return (
     <div
-      className="absolute top-[80px] left-[249px] w-[445px] h-[640px] bg-black/80 backdrop-blur-[25px] rounded-lg text-white text-[14px]"
+      className={`fixed top-[80px] left-0 z-10 w-[445px] h-[640px] bg-black/80 backdrop-blur-[25px] rounded-lg text-white text-[14px] transition-all duration-0 ease-in-out ${marginLeft} left-0`}
       style={{ zIndex: 10 }}
     >
       <div className="absolute top-[18px] left-[18px] flex items-center gap-2">
@@ -96,7 +99,6 @@ export default function PlotContainer() {
       <div className="absolute top-[410px] left-[18px] w-[400px] h-[220px]">
         <DailyForecastChart selectedStation={selectedStation} />
       </div>
-
 
     </div>
   );

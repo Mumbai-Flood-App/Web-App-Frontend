@@ -15,9 +15,21 @@ interface Station {
 }
 
 export default function PlotContainer({ sidebarOpen = true }: { sidebarOpen?: boolean }) {
+  const [stations, setStations] = useState<Station[]>([]);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [currentDate, setCurrentDate] = useState('');
   const [currentTime, setCurrentTime] = useState('');
+
+  // Fetch stations and set S ward as default
+  useEffect(() => {
+    fetch('/api/proxy-stations')
+      .then(res => res.json())
+      .then((data: Station[]) => {
+        setStations(data);
+        const sWard = data.find(station => station.name.toLowerCase().includes('s ward'));
+        if (sWard) setSelectedStation(sWard);
+      });
+  }, []);
 
   const handleStationChange = (station: Station) => {
     setSelectedStation(station);

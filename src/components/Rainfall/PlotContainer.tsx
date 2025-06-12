@@ -51,7 +51,15 @@ export default function PlotContainer({ sidebarOpen = true }: { sidebarOpen?: bo
 
   return (
     <div
-      className={`fixed top-[80px] left-0 z-10 w-[445px] h-[640px] bg-black/80 backdrop-blur-[25px] rounded-lg text-white text-[14px] transition-all duration-0 ease-in-out ${marginLeft} left-0`}
+      className={`fixed
+        top-[56px] md:top-[60px] lg:top-[80px]
+        left-0 z-10
+        w-[98vw] md:w-[370px] lg:w-[445px]
+        h-auto md:h-[520px] lg:h-[640px]
+        bg-black/80 backdrop-blur-[25px] rounded-lg text-white text-[14px]
+        transition-all duration-0 ease-in-out ${marginLeft} left-0
+        max-w-full
+      `}
       style={{ zIndex: 10 }}
     >
       <div className="absolute top-[18px] left-[18px] flex items-center gap-2">

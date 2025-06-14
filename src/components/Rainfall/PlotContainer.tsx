@@ -14,7 +14,7 @@ interface Station {
   rainfall: number;
 }
 
-export default function PlotContainer({ sidebarOpen = true }: { sidebarOpen?: boolean }) {
+export default function PlotContainer({ mobile = false, sidebarOpen = true }: { mobile?: boolean; sidebarOpen?: boolean }) {
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [currentDate, setCurrentDate] = useState('');
   const [currentTime, setCurrentTime] = useState('');
@@ -58,6 +58,41 @@ export default function PlotContainer({ sidebarOpen = true }: { sidebarOpen?: bo
   }, []);
 
   const marginLeft = sidebarOpen ? "lg:ml-[248px]" : "lg:ml-[90px]";
+
+  if (mobile) {
+    return (
+      <div className="relative w-full h-auto bg-black/80 backdrop-blur-[25px] rounded-lg text-white text-[14px] p-2 mt-2">
+        <div className="flex items-center gap-2 mb-4">
+          <Image src="/icons/rainfall-open-white.svg" alt="Rainfall Icon" width={38} height={36} />
+          <span className="text-[22px] font-bold">Rainfall</span>
+        </div>
+        <div className="mb-2">
+          <StationSelector selected={selectedStation} onChange={handleStationChange} />
+        </div>
+        <div className="mb-2 flex gap-2 items-center text-gray-100 text-sm">
+          <span className="font-medium">{currentDate}</span>
+          <span className="ml-2 font-medium">{currentTime}</span>
+        </div>
+        <div className="mb-4">
+          <div className="text-sm font-semibold mb-2 text-left text-white">
+            Observed Rainfall (Today)
+            <span className="text-xs text-gray-400 font-normal"> - 15 min interval (MCGM)</span>
+          </div>
+          <div className="w-full h-[180px]">
+            <TimeSeriesChart selectedStation={selectedStation} />
+          </div>
+        </div>
+        <div className="mb-2">
+          <div className="text-sm font-semibold mb-2 text-left text-white">
+            Daily Rainfall Forecast
+          </div>
+          <div className="w-full h-[180px]">
+            <DailyForecastChart selectedStation={selectedStation} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

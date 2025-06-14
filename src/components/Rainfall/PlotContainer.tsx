@@ -61,8 +61,8 @@ export default function PlotContainer({ mobile = false, sidebarOpen = true }: { 
 
   if (mobile) {
     return (
-      <div className="relative w-full h-auto bg-black/80 backdrop-blur-[25px] rounded-t-2xl text-white text-[14px] p-0">
-        <div className="flex items-center gap-2 mb-4 px-4 pt-2">
+      <div className="relative w-full h-auto bg-black/80 backdrop-blur-[25px] rounded-t-2xl text-white text-[14px] p-0 pt-6">
+        <div className="flex items-center gap-2 mb-4 px-4">
           <Image src="/icons/rainfall-open-white.svg" alt="Rainfall Icon" width={38} height={36} />
           <span className="text-[22px] font-bold">Rainfall</span>
         </div>

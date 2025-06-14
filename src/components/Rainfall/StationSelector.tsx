@@ -68,6 +68,11 @@ export default function StationSelector({ selected, onChange }: Props) {
     setSearchTerm(station.name);
     setShowOptions(false);
     onChange?.(station);
+    // Blur input to restore page zoom
+    if (containerRef.current) {
+      const input = containerRef.current.querySelector('input');
+      if (input) (input as HTMLInputElement).blur();
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +105,8 @@ export default function StationSelector({ selected, onChange }: Props) {
           onChange={handleInputChange}
           onFocus={() => setShowOptions(true)}
           placeholder={selected ? selected.name : "Select Station"}
+          inputMode="none"
+          style={{ fontSize: 16 }}
         />
         <button
           type="button"

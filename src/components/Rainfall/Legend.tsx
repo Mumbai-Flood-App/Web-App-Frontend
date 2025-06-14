@@ -9,7 +9,7 @@ const LEGEND = [
     { color: "bg-red-500", label: "Extremely Heavy Rainfall (>= 204.5 mm)" }, // Make sure this is present!
   ];
   
-  export default function Legend({ mobile = false, debugBorder = false }: { mobile?: boolean, debugBorder?: boolean }) {
+  export default function Legend({ mobile = false }: { mobile?: boolean }) {
     const [date, setDate] = useState<string>('');
 
     useEffect(() => {

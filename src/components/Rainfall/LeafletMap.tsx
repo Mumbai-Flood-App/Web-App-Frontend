@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useEffect, useState } from 'react';
-import Legend from './Legend';
 
 // Expanded Mumbai bounds to allow more rightward panning
 const mumbaiBounds: LatLngBoundsExpression = [
@@ -31,7 +30,6 @@ export default function LeafletMap() {
   const [stations, setStations] = useState<Station[]>([]);
   const [mapCenter, setMapCenter] = useState<[number, number]>(getInitialCenter);
   const [mapZoom, setMapZoom] = useState<number>(11);
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     fetch('/api/proxy-stations')
@@ -42,7 +40,6 @@ export default function LeafletMap() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setIsMobile(window.innerWidth < 768);
       if (window.innerWidth < 768) {
         setMapCenter([19.08, 72.90]);
         setMapZoom(5);

@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Import your icons
 import RainfallIcon from '../Sidebar/RainfallIcon';
@@ -21,6 +22,15 @@ const navItems = [
   { href: '/reported-floods', label: 'Reported Floods', icon: FloodReportIcon },
   { href: '/about', label: 'About', icon: InfoIcon },
   { href: '/language', label: 'Language', icon: LanguageIcon },
+];
+
+const mobileLogos = [
+  { src: "/img/iitb.svg", alt: "IIT Bombay" },
+  { src: "/img/ccs.svg", alt: "CCS" },
+  { src: "/img/imd.svg", alt: "IMD" },
+  { src: "/img/bmc.svg", alt: "BMC" },
+  { src: "/img/hdfc.svg", alt: "HDFC Ergo" },
+  { src: "/img/partner-vector.svg", alt: "Partner Vector" },
 ];
 
 export default function MobileNav() {
@@ -44,7 +54,21 @@ export default function MobileNav() {
       {/* Mobile Header */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-[#1E1E1E] border-b border-[#2D2D2D] z-50">
         <div className="h-full flex justify-between items-center px-4">
-          <h1 className="text-white text-lg font-medium">Mumbai Flood</h1>
+          {/* Logos left of title */}
+          <div className="flex items-center gap-2">
+            {mobileLogos.map((logo, i) => (
+              <Image
+                key={i}
+                src={logo.src}
+                alt={logo.alt}
+                width={logo.alt === "CCS" ? 36 : 24}
+                height={logo.alt === "CCS" ? 20 : 16}
+                className="object-contain"
+                priority={i === 0}
+              />
+            ))}
+            
+          </div>
 
           <div className="dropdown relative">
             <button

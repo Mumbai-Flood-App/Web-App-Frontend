@@ -12,7 +12,7 @@ const logos = [
 
 export default function FooterLogos() {
   return (
-    <div className="fixed bottom-0 right-0 z-30 bg-white rounded-tl-lg px-8 py-1.5 flex items-center gap-8 shadow-lg"
+    <div className="hidden md:flex fixed bottom-0 right-0 z-30 bg-white rounded-tl-lg px-8 py-1.5 items-center gap-8 shadow-lg"
          style={{ minHeight: 50 }}>
       {logos.map((logo, i) => (
         <Image

@@ -25,7 +25,7 @@ const LEGEND = [
     }, []);
 
     return (
-      <div className={mobile ? "absolute bottom-0 left-0 right-0 z-50 flex justify-end pointer-events-auto" : "fixed bottom-6 left-180 z-30"}>
+      <div className={mobile ? "absolute bottom-3 left-0 right-0 z-50 flex justify-end pointer-events-auto" : "fixed bottom-6 left-180 z-30"}>
         <div className={mobile ? `w-full max-w-[215px] mr-2 h-auto text-[10px] p-1 rounded-lg bg-black bg-opacity-90 backdrop-blur-[25px] text-white shadow-2xl` : `
           relative
           lg:w-[290px] lg:h-[195px] lg:text-xs lg:p-4
@@ -36,7 +36,11 @@ const LEGEND = [
           <div className="absolute inset-0 rounded-lg bg-black bg-opacity-90 pointer-events-none" />
           <div className="relative z-10 flex flex-col gap-2">
             <div className="font-bold mb-1">
-              Rainfall Forecast {date && <span className="text-red-500 text-base font-bold">({date})</span>}
+              Rainfall Forecast {date && (
+                <span className={mobile ? "text-red-500 text-xs font-bold" : "text-red-500 text-base font-bold"}>
+                  ({date})
+                </span>
+              )}
             </div>
             {LEGEND.map((item, i) => (
               <div key={i} className="flex items-center gap-2">

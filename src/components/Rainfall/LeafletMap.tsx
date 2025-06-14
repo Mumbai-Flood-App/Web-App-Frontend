@@ -30,6 +30,7 @@ export default function LeafletMap() {
   const [stations, setStations] = useState<Station[]>([]);
   const [mapCenter, setMapCenter] = useState<[number, number]>(getInitialCenter);
   const [mapZoom, setMapZoom] = useState<number>(11);
+  const [minZoom, setMinZoom] = useState(11);
 
   useEffect(() => {
     fetch('/api/proxy-stations')
@@ -42,10 +43,12 @@ export default function LeafletMap() {
     if (typeof window !== 'undefined') {
       if (window.innerWidth < 768) {
         setMapCenter([19.08, 72.90]);
-        setMapZoom(5);
+        setMapZoom(4);
+        setMinZoom(4);
       } else {
         setMapCenter([19.076, 73.10]);
         setMapZoom(11);
+        setMinZoom(11);
       }
     }
   }, []);
@@ -60,17 +63,21 @@ export default function LeafletMap() {
   };
 
   return (
-    <div className="md:fixed md:top-0 md:left-0 md:w-full md:h-screen relative w-full h-[75vh] z-0 overflow-visible">
+    <div
+      className="md:fixed md:top-0 md:left-0 md:w-full md:h-screen relative w-full h-[75vh] z-0 overflow-visible"
+      style={{ touchAction: 'none' }}
+    >
       <MapContainer
         center={mapCenter}
         zoom={mapZoom}
-        minZoom={11}
+        minZoom={minZoom}
         maxZoom={18}
         maxBounds={mumbaiBounds}
         maxBoundsViscosity={1.0}
         className="h-full w-full"
         scrollWheelZoom={true}
         dragging={true}
+        touchZoom={true}
         doubleClickZoom={true}
         attributionControl={false}
       >

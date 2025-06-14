@@ -20,6 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/images/favicon.png" />
+      </head>
       <body className={`${inter.className} bg-[#0F0F0F] text-white`}>
         <ClientLayout>
           <div className="flex min-h-screen w-screen md:overflow-hidden">

@@ -52,7 +52,7 @@ export default function MobileNav() {
   return (
     <div className="lg:hidden">
       {/* Mobile Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-[#1E1E1E] border-b border-[#2D2D2D] z-50">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-[#2D2D2D] z-[300]">
         <div className="h-full flex justify-between items-center px-4">
           {/* Logos left of title */}
           <div className="flex items-center gap-2">
@@ -72,11 +72,11 @@ export default function MobileNav() {
 
           <div className="dropdown relative">
             <button
-              className="dropdown-btn p-2 rounded-lg hover:bg-[#2D2D2D] transition-colors duration-200"
+              className="dropdown-btn p-2 rounded-lg hover:bg-[#f3f3f3] transition-colors duration-200"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               aria-label="Menu"
             >
-              <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

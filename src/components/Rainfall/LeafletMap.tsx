@@ -45,7 +45,7 @@ export default function LeafletMap() {
       setIsMobile(window.innerWidth < 768);
       if (window.innerWidth < 768) {
         setMapCenter([19.08, 72.90]);
-        setMapZoom(10);
+        setMapZoom(5);
       } else {
         setMapCenter([19.076, 73.10]);
         setMapZoom(11);
@@ -63,7 +63,7 @@ export default function LeafletMap() {
   };
 
   return (
-    <div className="md:fixed md:top-0 md:left-0 md:w-full md:h-screen relative w-full h-[75vh] z-0">
+    <div className="md:fixed md:top-0 md:left-0 md:w-full md:h-screen relative w-full h-[75vh] z-0 overflow-visible">
       <MapContainer
         center={mapCenter}
         zoom={mapZoom}
@@ -93,11 +93,6 @@ export default function LeafletMap() {
           </CircleMarker>
         ))}
       </MapContainer>
-      {isMobile && (
-        <div className="absolute bottom-0 left-0 right-0 z-30 flex justify-center pointer-events-none">
-          <Legend mobile />
-        </div>
-      )}
     </div>
   );
 }

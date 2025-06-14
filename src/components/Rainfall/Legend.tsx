@@ -9,7 +9,7 @@ const LEGEND = [
     { color: "bg-red-500", label: "Extremely Heavy Rainfall (>= 204.5 mm)" }, // Make sure this is present!
   ];
   
-  export default function Legend({ mobile = false }: { mobile?: boolean }) {
+  export default function Legend({ mobile = false, debugBorder = false }: { mobile?: boolean, debugBorder?: boolean }) {
     const [date, setDate] = useState<string>('');
 
     useEffect(() => {
@@ -25,8 +25,8 @@ const LEGEND = [
     }, []);
 
     return (
-      <div className={mobile ? "absolute bottom-0 left-0 right-0 z-30 flex justify-center" : "fixed bottom-6 left-180 z-30"}>
-        <div className={mobile ? `w-full h-auto text-[11px] p-1 rounded-lg bg-black bg-opacity-90 backdrop-blur-[25px] text-white shadow-lg` : `
+      <div className={mobile ? "absolute bottom-0 left-0 right-0 z-50 flex justify-end pointer-events-auto" : "fixed bottom-6 left-180 z-30"}>
+        <div className={mobile ? `w-full max-w-[215px] mr-2 h-auto text-[10px] p-1 rounded-lg bg-black bg-opacity-90 backdrop-blur-[25px] text-white shadow-2xl` : `
           relative
           lg:w-[290px] lg:h-[195px] lg:text-xs lg:p-4
           md:w-[220px] md:h-[145px] md:text-[11px] md:p-2

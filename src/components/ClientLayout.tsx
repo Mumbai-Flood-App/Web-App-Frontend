@@ -20,8 +20,13 @@ export default function ClientLayout({
   return (
     <>
       {showBanner && <HeadBanner sidebarOpen={isSidebarOpen} />}
-      {showPlotContainer && <PlotContainer sidebarOpen={isSidebarOpen} />}
-      <div className="flex min-h-screen w-screen overflow-hidden">
+      {/* Desktop: hidden on small screens, block on md+ */}
+      {showPlotContainer && (
+        <div className="hidden md:block">
+          <PlotContainer sidebarOpen={isSidebarOpen} />
+        </div>
+      )}
+      <div className="flex min-h-screen w-screen md:overflow-hidden">
         {/* Sidebar - hidden on mobile */}
         <div className="hidden lg:block h-screen z-10">
           <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />

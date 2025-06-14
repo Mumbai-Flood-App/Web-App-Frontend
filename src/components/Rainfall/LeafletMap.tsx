@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useEffect, useState } from 'react';
+import Legend from './Legend';
 
 // Expanded Mumbai bounds to allow more rightward panning
 const mumbaiBounds: LatLngBoundsExpression = [
@@ -19,14 +20,37 @@ interface Station {
   rainfall: number;
 }
 
+const getInitialCenter = (): [number, number] => {
+  if (typeof window !== 'undefined' && window.innerWidth < 768) {
+    return [19.12, 72.90]; // mobile
+  }
+  return [19.076, 73.10]; // desktop
+};
+
 export default function LeafletMap() {
   const [stations, setStations] = useState<Station[]>([]);
+  const [mapCenter, setMapCenter] = useState<[number, number]>(getInitialCenter);
+  const [mapZoom, setMapZoom] = useState<number>(11);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     fetch('/api/proxy-stations')
       .then(res => res.json())
       .then(setStations)
       .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth < 768) {
+        setMapCenter([19.08, 72.90]);
+        setMapZoom(10);
+      } else {
+        setMapCenter([19.076, 73.10]);
+        setMapZoom(11);
+      }
+    }
   }, []);
 
   const getColor = (rainfall: number) => {
@@ -39,10 +63,10 @@ export default function LeafletMap() {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full h-screen z-0">
+    <div className="md:fixed md:top-0 md:left-0 md:w-full md:h-screen relative w-full h-[75vh] z-0">
       <MapContainer
-        center={[19.076, 73.10]} // Adjusted longitude to be closer to eastern boundary
-        zoom={11}
+        center={mapCenter}
+        zoom={mapZoom}
         minZoom={11}
         maxZoom={18}
         maxBounds={mumbaiBounds}
@@ -69,6 +93,11 @@ export default function LeafletMap() {
           </CircleMarker>
         ))}
       </MapContainer>
+      {isMobile && (
+        <div className="absolute bottom-0 left-0 right-0 z-30 flex justify-center pointer-events-none">
+          <Legend mobile />
+        </div>
+      )}
     </div>
   );
 }

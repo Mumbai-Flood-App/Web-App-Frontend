@@ -22,9 +22,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} bg-[#0F0F0F] text-white`}>
         <ClientLayout>
-          <div className="flex min-h-screen w-screen overflow-hidden">
+          <div className="flex min-h-screen w-screen md:overflow-hidden">
             {/* Main content */}
-            <main className="flex-1 h-screen w-full overflow-hidden">
+            <main className="flex-1 w-full md:h-screen md:overflow-hidden">
               {children}
             </main>
             {/* Mobile Navigation - shown only on mobile */}

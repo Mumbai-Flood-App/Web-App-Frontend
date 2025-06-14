@@ -100,6 +100,7 @@ export default function StationSelector({ selected, onChange }: Props) {
           onChange={handleInputChange}
           onFocus={() => setShowOptions(true)}
           placeholder={selected ? selected.name : "Select Station"}
+          style={{ fontSize: 16 }}
         />
         <button
           type="button"

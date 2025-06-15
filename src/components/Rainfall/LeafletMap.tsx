@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useEffect, useState } from 'react';
+import { useStation } from '../../contexts/StationContext';
 
 // Expanded Mumbai bounds to allow more rightward panning
 const mumbaiBounds: LatLngBoundsExpression = [
@@ -31,6 +32,7 @@ export default function LeafletMap() {
   const [mapCenter, setMapCenter] = useState<[number, number]>(getInitialCenter);
   const [mapZoom, setMapZoom] = useState<number>(11);
   const [minZoom, setMinZoom] = useState(11);
+  const { setSelectedStation } = useStation();
 
   useEffect(() => {
     fetch('/api/proxy-stations')
@@ -90,6 +92,9 @@ export default function LeafletMap() {
             color="black"
             fillColor={getColor(station.rainfall)}
             fillOpacity={1}
+            eventHandlers={{
+              click: () => setSelectedStation({ ...station, station_id: (station as any).station_id ?? station.id })
+            }}
           >
             <Tooltip permanent={false} direction="top" offset={[0, -10]}>
               {station.name} ({station.rainfall.toFixed(2)} mm)

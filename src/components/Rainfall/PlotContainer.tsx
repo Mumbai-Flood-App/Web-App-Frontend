@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import StationSelector from "./StationSelector";
 import TimeSeriesChart from "./TimeSeriesChart";
 import DailyForecastChart from "./DailyForecastChart";
+import { useStation } from '../../contexts/StationContext';
 
 interface Station {
   id: number;
@@ -15,19 +16,9 @@ interface Station {
 }
 
 export default function PlotContainer({ mobile = false, sidebarOpen = true }: { mobile?: boolean; sidebarOpen?: boolean }) {
-  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+  const { selectedStation, setSelectedStation } = useStation();
   const [currentDate, setCurrentDate] = useState('');
   const [currentTime, setCurrentTime] = useState('');
-
-  // Fetch stations and set S ward as default
-  useEffect(() => {
-    fetch('/api/proxy-stations')
-      .then(res => res.json())
-      .then((data: Station[]) => {
-        const sWard = data.find(station => station.name.toLowerCase().includes('s ward'));
-        if (sWard) setSelectedStation(sWard);
-      });
-  }, []);
 
   const handleStationChange = (station: Station) => {
     setSelectedStation(station);

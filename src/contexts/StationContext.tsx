@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface Station {
   id: number;
@@ -19,6 +19,19 @@ const StationContext = createContext<StationContextType | undefined>(undefined);
 
 export const StationProvider = ({ children }: { children: ReactNode }) => {
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+
+  // Set default station (S ward) on first load
+  useEffect(() => {
+    fetch('/api/proxy-stations')
+      .then(res => res.json())
+      .then((data: Station[]) => {
+        const sWard = data.find(station => station.name.toLowerCase().includes('s ward'));
+        if (sWard) {
+          // Ensure station_id is present
+          setSelectedStation({ ...sWard, station_id: sWard.station_id ?? sWard.id });
+        }
+      });
+  }, []);
 
   return (
     <StationContext.Provider value={{ selectedStation, setSelectedStation }}>

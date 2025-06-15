@@ -7,6 +7,11 @@ interface DailyDataPoint {
   date: string;
   observed: number;
   predicted: number;
+  is_forecasted: boolean;
+  originalDate?: string;
+}
+
+interface ProcessedDataPoint extends Omit<DailyDataPoint, 'is_forecasted'> {
   isForecasted: boolean;
 }
 
@@ -28,12 +33,12 @@ interface PayloadItem {
     isForecasted: boolean;
     predicted: number;
     observed: number;
-    predictedStar: number;
+    date: string;
   };
 }
 
 export default function DailyForecastChart({ selectedStation }: Props) {
-  const [dailyData, setDailyData] = useState<DailyDataPoint[]>([]);
+  const [dailyData, setDailyData] = useState<ProcessedDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [separatorDate, setSeparatorDate] = useState<string>('');
@@ -67,30 +72,28 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     
     fetchStationData(selectedStation.station_id)
       .then((response: { daily_data: DailyDataPoint[] }) => {
-        console.log('Daily forecast response:', response);
         const dailyApiData = response.daily_data || [];
         
-        // Replicate the exact logic from your React code
-        const combinedData = dailyApiData.map((item: DailyDataPoint, index: number) => {
-          const dateLabel = formatDateToIST(item.date);
-          const observed = index < dailyApiData.length - 3 ? item.observed : 0; // Show observed for all but the last three
-          const predicted = index < dailyApiData.length - 3 ? 0 : item.predicted; // Show predicted bar for the last three entries only
-          const isForecasted = index >= dailyApiData.length - 3;
+        // Process the data
+        const processedData = dailyApiData.map(item => ({
+          date: formatDateToIST(item.date),
+          observed: item.observed,
+          predicted: item.predicted,
+          isForecasted: item.is_forecasted,
+          originalDate: item.date
+        }));
 
-          return {
-            date: dateLabel,
-            observed: observed,
-            predicted: predicted,
-            predictedStar: index < dailyApiData.length - 3 ? item.predicted : 0, // Stars for past predicted
-            isForecasted: isForecasted,
-            originalDate: item.date
-          };
+        // Find today's date for separator
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayIndex = processedData.findIndex(item => {
+          const itemDate = new Date(item.originalDate || '');
+          itemDate.setHours(0, 0, 0, 0);
+          return itemDate.getTime() === today.getTime();
         });
-        
-        // Set separator at the first forecasted day (last 3 days start)
-        const separatorIdx = dailyApiData.length - 3;
-        setSeparatorDate(combinedData[separatorIdx]?.date || '');
-        setDailyData(combinedData);
+
+        setSeparatorDate(processedData[todayIndex]?.date || '');
+        setDailyData(processedData);
         setLoading(false);
       })
       .catch(err => {
@@ -99,7 +102,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
       });
   }, [selectedStation]);
 
-  const CustomTooltip = ({ active, payload, label }: { active: boolean; payload: PayloadItem[]; label: string }) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: PayloadItem[]; label?: string }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       if (!data) return null;
@@ -118,9 +121,9 @@ export default function DailyForecastChart({ selectedStation }: Props) {
                   <span className="font-bold">Observed:</span> {data.observed?.toFixed(2)}mm
                 </p>
               )}
-              {data.predictedStar > 0 && (
+              {data.predicted > 0 && (
                 <p className="text-blue-400 text-sm font-bold">
-                  <span className="font-bold">Predicted:</span> {data.predictedStar?.toFixed(2)}mm
+                  <span className="font-bold">Predicted:</span> {data.predicted?.toFixed(2)}mm
                 </p>
               )}
             </>
@@ -161,11 +164,31 @@ export default function DailyForecastChart({ selectedStation }: Props) {
   const maxValue = Math.max(
     ...dailyData.map(d => Math.max(d.observed || 0, d.predicted || 0))
   );
-  const yDomainMax = Math.max(Math.ceil(maxValue / 50) * 50, 300);
+
+  // Helper to get a nice round step for Y axis
+  function getNiceStep(max: number) {
+    if (max <= 10) return 2;
+    if (max <= 50) return 10;
+    if (max <= 100) return 20;
+    if (max <= 200) return 50;
+    if (max <= 500) return 100;
+    if (max <= 1000) return 200;
+    return Math.pow(10, Math.floor(Math.log10(max)));
+  }
+
+  const yDomainMax = maxValue > 0 ? Math.ceil(maxValue * 1.1) : 10;
+  const step = getNiceStep(yDomainMax);
+  const getTicks = () => {
+    const ticks = [];
+    for (let i = 0; i <= yDomainMax; i += step) {
+      ticks.push(i);
+    }
+    if (ticks[ticks.length - 1] < yDomainMax) ticks.push(yDomainMax);
+    return ticks;
+  };
 
   return (
     <div className="w-full h-full bg-black rounded-lg p-2 relative">
-      {/* Past Data and Forecasted labels - Fixed positioning like React code */}
       <div className="absolute top-1 left-0 right-0 flex justify-between items-center text-xs text-white z-10">
         <div className="flex items-center ml-20">
           <span>Past Data</span>
@@ -181,7 +204,6 @@ export default function DailyForecastChart({ selectedStation }: Props) {
         <BarChart data={dailyData} margin={{ top: 15, right: 15, left: -10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
           
-          {/* Vertical separator line at the exact separator date */}
           {separatorDate && (
             <ReferenceLine 
               x={separatorDate}
@@ -206,27 +228,21 @@ export default function DailyForecastChart({ selectedStation }: Props) {
               style: { textAnchor: 'middle', fill: '#9ca3af', fontSize: '12px', fontWeight: 'bold' } 
             }}
             domain={[0, yDomainMax]}
-            ticks={[0, 50, 100, 150, 200, 250, 300]}
+            ticks={getTicks()}
             tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 'bold' }}
             axisLine={{ stroke: '#4b5563', strokeWidth: 2 }}
             tickLine={false}
+            tickFormatter={v => v.toLocaleString('en-IN')}
           />
           
-          <Tooltip content={({ active, payload, label }) => {
-            if (active && payload && payload.length) {
-              return <CustomTooltip active={active} payload={payload} label={label} />;
-            }
-            return null;
-          }} />
+          <Tooltip content={CustomTooltip} />
           
-          {/* Observed data bars (past days) */}
           <Bar dataKey="observed" name="Observed" radius={[2, 2, 0, 0]}>
             {dailyData.map((entry, idx) => (
               <Cell key={`observed-${idx}`} fill="#ADADC9" />
             ))}
           </Bar>
           
-          {/* Predicted data bars (future 3 days) with color coding */}
           <Bar dataKey="predicted" name="Predicted" radius={[2, 2, 0, 0]}>
             {dailyData.map((entry, idx) => (
               <Cell 

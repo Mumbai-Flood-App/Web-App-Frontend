@@ -11,8 +11,13 @@ interface DailyDataPoint {
   originalDate?: string;
 }
 
-interface ProcessedDataPoint extends Omit<DailyDataPoint, 'is_forecasted'> {
+interface ProcessedDataPoint {
+  date: string;
+  observed: number;
+  predicted: number;
+  pastPredicted: number;
   isForecasted: boolean;
+  originalDate?: string;
 }
 
 interface Station {
@@ -33,6 +38,7 @@ interface PayloadItem {
     isForecasted: boolean;
     predicted: number;
     observed: number;
+    pastPredicted: number;
     date: string;
   };
 }
@@ -61,6 +67,58 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     return new Date(date).toLocaleDateString('en-IN', options);
   };
 
+  // Custom Legend Component
+  const CustomLegend = () => {
+    return (
+      <div className="flex justify-center items-center space-x-6 mt-2 text-xs text-gray-300">
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 bg-gray-400 rounded-sm"></div>
+          <span>Observed</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 bg-white border border-gray-400 rounded-sm"></div>
+          <span>Past Predicted</span>
+        </div>
+      </div>
+    );
+  };
+
+  // Custom Tooltip
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: PayloadItem[]; label?: string }) => {
+    if (!active || !payload || !payload.length || !payload[0].payload) {
+      return null;
+    }
+  
+    const data = payload[0].payload;
+    // Determine color for predicted
+    const predictedColor = data.isForecasted
+      ? getColor(data.predicted) // future predicted
+      : "#FFFFFF"; // past predicted (white bar)
+    const observedColor = "#ADADC9";
+  
+    return (
+      <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
+        <p className="text-white text-sm font-bold">{label}</p>
+        {data.isForecasted ? (
+          <p className="text-sm font-bold" style={{ color: predictedColor }}>
+            <span className="font-bold">Predicted:</span> {data.predicted?.toFixed(2)}mm
+          </p>
+        ) : (
+          <>
+            <p className="text-sm font-bold" style={{ color: observedColor }}>
+              <span className="font-bold">Observed:</span> {data.observed?.toFixed(2)}mm
+            </p>
+            {data.pastPredicted > 0 && (
+              <p className="text-sm font-bold" style={{ color: predictedColor }}>
+                <span className="font-bold">Predicted:</span> {data.pastPredicted?.toFixed(2)}mm
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
   useEffect(() => {
     if (!selectedStation) {
       setDailyData([]);
@@ -74,11 +132,12 @@ export default function DailyForecastChart({ selectedStation }: Props) {
       .then((response: { daily_data: DailyDataPoint[] }) => {
         const dailyApiData = response.daily_data || [];
         
-        // Process the data
-        const processedData = dailyApiData.map(item => ({
+        // Process the data - create separate entries for past vs future
+        const processedData: ProcessedDataPoint[] = dailyApiData.map(item => ({
           date: formatDateToIST(item.date),
-          observed: item.observed,
-          predicted: item.predicted,
+          observed: !item.is_forecasted ? item.observed : 0,
+          predicted: item.is_forecasted ? item.predicted : 0,
+          pastPredicted: !item.is_forecasted && item.predicted > 0 ? item.predicted : 0,
           isForecasted: item.is_forecasted,
           originalDate: item.date
         }));
@@ -101,34 +160,6 @@ export default function DailyForecastChart({ selectedStation }: Props) {
         setLoading(false);
       });
   }, [selectedStation]);
-
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: PayloadItem[]; label?: string }) => {
-    if (!active || !payload || !payload.length || !payload[0].payload) {
-      return <div style={{ display: 'none' }} />;
-    }
-    const data = payload[0].payload;
-    return (
-      <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
-        <p className="text-white text-sm font-bold">{label}</p>
-        {data.isForecasted ? (
-          <p className="text-blue-400 text-sm font-bold">
-            <span className="font-bold">Predicted:</span> {data.predicted?.toFixed(2)}mm
-          </p>
-        ) : (
-          <>
-            <p className="text-gray-300 text-sm font-bold">
-              <span className="font-bold">Observed:</span> {data.observed?.toFixed(2)}mm
-            </p>
-            {data.predicted > 0 && (
-              <p className="text-blue-400 text-sm font-bold">
-                <span className="font-bold">Predicted:</span> {data.predicted?.toFixed(2)}mm
-              </p>
-            )}
-          </>
-        )}
-      </div>
-    );
-  };
 
   if (loading) {
     return (
@@ -158,7 +189,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
   }
 
   const maxValue = Math.max(
-    ...dailyData.map(d => Math.max(d.observed || 0, d.predicted || 0))
+    ...dailyData.map(d => Math.max(d.observed || 0, d.predicted || 0, d.pastPredicted || 0))
   );
 
   // Helper to get a nice round step for Y axis
@@ -195,8 +226,8 @@ export default function DailyForecastChart({ selectedStation }: Props) {
           <span>Forecasted</span>
         </div>
       </div>
-
-      <ResponsiveContainer width="100%" height="100%">
+      
+      <ResponsiveContainer width="100%" height="92%">
         <BarChart data={dailyData} margin={{ top: 15, right: 15, left: -10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
           
@@ -224,31 +255,61 @@ export default function DailyForecastChart({ selectedStation }: Props) {
               style: { textAnchor: 'middle', fill: '#9ca3af', fontSize: '12px', fontWeight: 'bold' } 
             }}
             domain={[0, yDomainMax]}
-            ticks={getTicks()}
+            ticks={getTicks()} // Fixed typo from 'get kneel'
             tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 'bold' }}
             axisLine={{ stroke: '#4b5563', strokeWidth: 2 }}
             tickLine={false}
             tickFormatter={v => v.toLocaleString('en-IN')}
           />
           
-          <Tooltip content={CustomTooltip} />
+          <Tooltip content={CustomTooltip} cursor={false} />
           
-          <Bar dataKey="observed" name="Observed" radius={[2, 2, 0, 0]}>
+          {/* Past Predicted bars - White without border */}
+          <Bar 
+            dataKey="pastPredicted" 
+            stackId="past" 
+            radius={[2, 2, 0, 0]}
+            isAnimationActive={false}
+          >
+            {dailyData.map((entry, idx) => (
+              <Cell 
+                key={`past-predicted-${idx}`} 
+                fill="#FFFFFF"
+              />
+            ))}
+          </Bar>
+          
+          {/* Observed bars - Gray, stacked with past predicted for side-by-side effect */}
+          <Bar 
+            dataKey="observed" 
+            stackId="observed" 
+            radius={[2, 2, 0, 0]}
+            isAnimationActive={false}
+          >
             {dailyData.map((entry, idx) => (
               <Cell key={`observed-${idx}`} fill="#ADADC9" />
             ))}
           </Bar>
           
-          <Bar dataKey="predicted" name="Predicted" radius={[2, 2, 0, 0]}>
+          {/* Future Predicted bars - Colored, separate stack */}
+          <Bar 
+            dataKey="predicted" 
+            stackId="future" 
+            radius={[2, 2, 0, 0]}
+            isAnimationActive={false}
+          >
             {dailyData.map((entry, idx) => (
               <Cell 
                 key={`predicted-${idx}`} 
-                fill={entry.isForecasted ? getColor(entry.predicted) : 'transparent'} 
+                fill={entry.predicted > 0 ? getColor(entry.predicted) : 'transparent'} 
               />
             ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+      
+      {/* Custom Legend */}
+      <CustomLegend />
     </div>
   );
 }

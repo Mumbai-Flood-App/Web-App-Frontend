@@ -18,6 +18,7 @@ interface Station {
   latitude: number;
   longitude: number;
   rainfall: number;
+  station_id?: number;  // Add optional station_id field
 }
 
 const getInitialCenter = (): [number, number] => {
@@ -93,7 +94,7 @@ export default function LeafletMap() {
             fillColor={getColor(station.rainfall)}
             fillOpacity={1}
             eventHandlers={{
-              click: () => setSelectedStation({ ...station, station_id: (station as any).station_id ?? station.id })
+              click: () => setSelectedStation({ ...station, station_id: station.station_id ?? station.id })
             }}
           >
             <Tooltip permanent={false} direction="top" offset={[0, -10]}>

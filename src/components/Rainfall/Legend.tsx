@@ -17,7 +17,7 @@ const LEGEND = [
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       const formattedDate = tomorrow.toLocaleDateString('en-US', {
-        weekday: 'long',
+        weekday: 'short',
         month: 'long',
         day: 'numeric',
       });

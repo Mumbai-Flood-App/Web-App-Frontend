@@ -85,6 +85,7 @@ export default function LeafletMap() {
         attributionControl={false}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {/* Temporarily commented out station markers
         {stations.length > 0 && stations.map(station => (
           <CircleMarker
             key={station.id}
@@ -102,6 +103,7 @@ export default function LeafletMap() {
             </Tooltip>
           </CircleMarker>
         ))}
+        */}
       </MapContainer>
     </div>
   );

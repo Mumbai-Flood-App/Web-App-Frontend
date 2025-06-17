@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { fetchObservedRainfall } from '../../utils/RainfallApis';
+import { fetchQuarterlyAWSData } from '../../utils/RainfallApis';
 
 interface ObservedDataPoint {
   timestamp: string;
@@ -35,7 +35,7 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
     setLoading(true);
     setError(null);
     
-    fetchObservedRainfall(selectedStation.station_id)
+    fetchQuarterlyAWSData(selectedStation.station_id)
     .then((response: ObservedDataPoint[]) => {
       setData(response);
       setLoading(false);
@@ -56,22 +56,23 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
     });
   };
 
-  // Generate exactly 5 evenly spaced tick values from the data
+  // Generate exactly 6 evenly spaced tick values from the data for hourly data
   const getTickValues = (data: ObservedDataPoint[]) => {
     if (!data || data.length === 0) return [];
     
     const dataLength = data.length;
-    if (dataLength <= 5) {
+    if (dataLength <= 6) {
       return data.map(d => d.timestamp);
     }
     
-    // Generate 5 evenly spaced indices
-    const step = Math.floor(dataLength / 4);
+    // Generate 6 evenly spaced indices for hourly data
+    const step = Math.floor(dataLength / 5);
     const indices = [
       0,
       step,
       step * 2, 
       step * 3,
+      step * 4,
       dataLength - 1
     ];
     
@@ -83,9 +84,23 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
     active?: boolean; payload?: any[]; label?: string;
   }) => {
     if (active && payload && payload.length && label) {
+      const date = new Date(label);
+      const formattedDate = date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'Asia/Kolkata'
+      });
+      const formattedTime = date.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Asia/Kolkata'
+      });
+      
       return (
         <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
-          <p className="text-gray-300 text-sm font-bold">{formatTime(label)}</p>
+          <p className="text-gray-300 text-sm font-bold">{formattedDate}</p>
+          <p className="text-gray-300 text-sm font-bold">{formattedTime}</p>
           <p className="text-green-400 text-sm font-bold">
             <span className="font-bold">Rainfall:</span> {payload[0].value?.toFixed(2)}mm
           </p>

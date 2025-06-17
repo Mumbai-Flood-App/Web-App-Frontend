@@ -1,9 +1,18 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 interface Station {
   id: number;
   station_id: number;
   name: string;
   latitude: number;
   longitude: number;
+  rainfall: number;
+}
+
+interface QuarterlyAWSData {
+  id: number;
+  station: number;
+  timestamp: string;
   rainfall: number;
 }
 
@@ -42,6 +51,19 @@ export const fetchObservedRainfall = async (stationId: number) => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching observed rainfall data:', error);
+    throw error;
+  }
+};
+
+export const fetchQuarterlyAWSData = async (stationId: number): Promise<QuarterlyAWSData[]> => {
+  try {
+    const response = await fetch(`/api/proxy-quarterly-aws-data/${stationId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch quarterly AWS data');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching quarterly AWS data:', error);
     throw error;
   }
 };

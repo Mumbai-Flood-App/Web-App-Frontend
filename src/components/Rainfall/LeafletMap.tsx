@@ -1,5 +1,5 @@
 'use client';
-import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, /* CircleMarker, Tooltip */ } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useEffect, useState } from 'react';
@@ -29,18 +29,18 @@ const getInitialCenter = (): [number, number] => {
 };
 
 export default function LeafletMap() {
-  const [stations, setStations] = useState<Station[]>([]);
+  // const [stations, setStations] = useState<Station[]>([]);
   const [mapCenter, setMapCenter] = useState<[number, number]>(getInitialCenter);
   const [mapZoom, setMapZoom] = useState<number>(11);
   const [minZoom, setMinZoom] = useState(11);
-  const { setSelectedStation } = useStation();
+  // const { setSelectedStation } = useStation();
 
-  useEffect(() => {
+  /* useEffect(() => {
     fetch('/api/proxy-stations')
       .then(res => res.json())
       .then(setStations)
       .catch(console.error);
-  }, []);
+  }, []); */
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -56,14 +56,14 @@ export default function LeafletMap() {
     }
   }, []);
 
-  const getColor = (rainfall: number) => {
+  /* const getColor = (rainfall: number) => {
     if (rainfall > 204.4) return 'red';
     if (rainfall > 115.5) return 'orange';
     if (rainfall > 64.4) return 'yellow';
     if (rainfall > 15.5) return 'skyblue';
     if (rainfall > 0) return 'lightgreen';
     return 'grey';
-  };
+  }; */
 
   return (
     <div

@@ -71,10 +71,10 @@ export default function DailyForecastChart({ selectedStation }: Props) {
   const CustomLegend = () => {
     return (
       <div className="flex justify-center items-center space-x-6 mt-2 text-xs text-gray-300">
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-gray-400 rounded-sm"></div>
           <span>Observed</span>
-        </div>
+        </div> */}
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-white border border-gray-400 rounded-sm"></div>
           <span>Past Predicted</span>
@@ -105,9 +105,9 @@ export default function DailyForecastChart({ selectedStation }: Props) {
           </p>
         ) : (
           <>
-            <p className="text-sm font-bold" style={{ color: observedColor }}>
+            {/* <p className="text-sm font-bold" style={{ color: observedColor }}>
               <span className="font-bold">Observed:</span> {data.observed?.toFixed(2)}mm
-            </p>
+            </p> */}
             {data.pastPredicted > 0 && (
               <p className="text-sm font-bold" style={{ color: predictedColor }}>
                 <span className="font-bold">Predicted:</span> {data.pastPredicted?.toFixed(2)}mm
@@ -280,7 +280,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
           </Bar>
           
           {/* Observed bars - Gray, stacked with past predicted for side-by-side effect */}
-          <Bar 
+          {/* <Bar 
             dataKey="observed" 
             stackId="observed" 
             radius={[2, 2, 0, 0]}
@@ -289,7 +289,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
             {dailyData.map((entry, idx) => (
               <Cell key={`observed-${idx}`} fill="#ADADC9" />
             ))}
-          </Bar>
+          </Bar> */}
           
           {/* Future Predicted bars - Colored, separate stack */}
           <Bar 

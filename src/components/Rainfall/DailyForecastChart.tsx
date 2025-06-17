@@ -94,7 +94,6 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     const predictedColor = data.isForecasted
       ? getColor(data.predicted) // future predicted
       : "#FFFFFF"; // past predicted (white bar)
-    const observedColor = "#ADADC9";
   
     return (
       <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
@@ -105,9 +104,6 @@ export default function DailyForecastChart({ selectedStation }: Props) {
           </p>
         ) : (
           <>
-            {/* <p className="text-sm font-bold" style={{ color: observedColor }}>
-              <span className="font-bold">Observed:</span> {data.observed?.toFixed(2)}mm
-            </p> */}
             {data.pastPredicted > 0 && (
               <p className="text-sm font-bold" style={{ color: predictedColor }}>
                 <span className="font-bold">Predicted:</span> {data.pastPredicted?.toFixed(2)}mm

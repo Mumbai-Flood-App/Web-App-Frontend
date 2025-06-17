@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { fetchQuarterlyAWSData } from '../../utils/RainfallApis';
+import { fetchHourlyAWSData } from '../../utils/RainfallApis';
 
 interface ObservedDataPoint {
   timestamp: string;
@@ -35,7 +35,7 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
     setLoading(true);
     setError(null);
     
-    fetchQuarterlyAWSData(selectedStation.station_id)
+    fetchHourlyAWSData(selectedStation.station_id)
     .then((response: ObservedDataPoint[]) => {
       setData(response);
       setLoading(false);

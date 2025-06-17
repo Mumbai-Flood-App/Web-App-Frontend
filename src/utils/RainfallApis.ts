@@ -7,9 +7,7 @@ interface Station {
   rainfall: number;
 }
 
-interface QuarterlyAWSData {
-  id: number;
-  station: number;
+interface HourlyAWSData {
   timestamp: string;
   rainfall: number;
 }
@@ -53,15 +51,15 @@ export const fetchObservedRainfall = async (stationId: number) => {
   }
 };
 
-export const fetchQuarterlyAWSData = async (stationId: number): Promise<QuarterlyAWSData[]> => {
+export const fetchHourlyAWSData = async (stationId: number): Promise<HourlyAWSData[]> => {
   try {
-    const response = await fetch(`/api/proxy-quarterly-aws-data/${stationId}`);
+    const response = await fetch(`/api/proxy-hourly-aws-data/${stationId}`);
     if (!response.ok) {
-      throw new Error('Failed to fetch quarterly AWS data');
+      throw new Error('Failed to fetch hourly AWS data');
     }
     return await response.json();
   } catch (error) {
-    console.error('Error fetching quarterly AWS data:', error);
+    console.error('Error fetching hourly AWS data:', error);
     throw error;
   }
 };

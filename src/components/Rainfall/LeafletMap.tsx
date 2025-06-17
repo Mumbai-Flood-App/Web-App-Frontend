@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, /* CircleMarker, Tooltip */ } from 'react-leaf
 import 'leaflet/dist/leaflet.css';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useEffect, useState } from 'react';
-import { useStation } from '../../contexts/StationContext';
+// import { useStation } from '../../contexts/StationContext';
 
 // Expanded Mumbai bounds to allow more rightward panning
 const mumbaiBounds: LatLngBoundsExpression = [
@@ -11,7 +11,7 @@ const mumbaiBounds: LatLngBoundsExpression = [
   [19.35, 73.15], // Northeast - moved right boundary further right
 ];
 
-// Station type
+/* // Station type
 interface Station {
   id: number;
   name: string;
@@ -19,7 +19,7 @@ interface Station {
   longitude: number;
   rainfall: number;
   station_id?: number;  // Add optional station_id field
-}
+} */
 
 const getInitialCenter = (): [number, number] => {
   if (typeof window !== 'undefined' && window.innerWidth < 768) {

@@ -123,8 +123,8 @@ export default function PlotContainer({ mobile = false, sidebarOpen = true }: { 
       
       <div className="absolute top-[120px] left-[18px] w-[400px]">
         <div className="text-sm font-semibold mb-2 text-left text-white">
-            Observed Rainfall (Today)
-            <span className="text-xs text-gray-400 font-normal"> - 15 min interval (MCGM)</span>
+            Observed Hourly Rainfall (Today)
+            <span className="text-xs text-gray-400 font-normal"> - (MCGM)</span>
         </div>
       </div>
 

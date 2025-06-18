@@ -56,27 +56,34 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
     });
   };
 
-  // Generate exactly 6 evenly spaced tick values from the data for hourly data
+  // Generate tick values for hourly intervals
   const getTickValues = (data: ObservedDataPoint[]) => {
     if (!data || data.length === 0) return [];
-    
-    const dataLength = data.length;
-    if (dataLength <= 6) {
-      return data.map(d => d.timestamp);
+
+    // Filter for timestamps that are exactly on the hour
+    const hourlyTimestamps = data
+      .map(d => d.timestamp)
+      .filter(ts => {
+        const date = new Date(ts);
+        return date.getMinutes() === 0 && date.getSeconds() === 0;
+      });
+
+    // Use all hourly timestamps if available, max 6 ticks
+    if (hourlyTimestamps.length >= 1) {
+      const step = Math.max(1, Math.floor(hourlyTimestamps.length / 5));
+      const ticks = [];
+      for (let i = 0; i < hourlyTimestamps.length; i += step) {
+        ticks.push(hourlyTimestamps[i]);
+        if (ticks.length >= 6) break;
+      }
+      if (ticks[ticks.length - 1] !== hourlyTimestamps[hourlyTimestamps.length - 1]) {
+        ticks.push(hourlyTimestamps[hourlyTimestamps.length - 1]);
+      }
+      return ticks;
+    } else {
+      // Fallback: use the first and last if no hourly data
+      return [data[0].timestamp, data[data.length - 1].timestamp];
     }
-    
-    // Generate 6 evenly spaced indices for hourly data
-    const step = Math.floor(dataLength / 5);
-    const indices = [
-      0,
-      step,
-      step * 2, 
-      step * 3,
-      step * 4,
-      dataLength - 1
-    ];
-    
-    return indices.map(index => data[index].timestamp);
   };
 
   const CustomTooltip = ({ active, payload, label }: { 

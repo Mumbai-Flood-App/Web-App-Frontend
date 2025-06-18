@@ -1,9 +1,9 @@
 'use client';
-import { MapContainer, TileLayer, /* CircleMarker, Tooltip */ } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useEffect, useState } from 'react';
-// import { useStation } from '../../contexts/StationContext';
+import { useStation } from '../../contexts/StationContext';
 
 // Expanded Mumbai bounds to allow more rightward panning
 const mumbaiBounds: LatLngBoundsExpression = [
@@ -11,15 +11,15 @@ const mumbaiBounds: LatLngBoundsExpression = [
   [19.35, 73.15], // Northeast - moved right boundary further right
 ];
 
-/* // Station type
+// Station type
 interface Station {
   id: number;
   name: string;
   latitude: number;
   longitude: number;
   rainfall: number;
-  station_id?: number;  // Add optional station_id field
-} */
+  station_id?: number;
+}
 
 const getInitialCenter = (): [number, number] => {
   if (typeof window !== 'undefined' && window.innerWidth < 768) {
@@ -29,18 +29,18 @@ const getInitialCenter = (): [number, number] => {
 };
 
 export default function LeafletMap() {
-  // const [stations, setStations] = useState<Station[]>([]);
+  const [stations, setStations] = useState<Station[]>([]);
   const [mapCenter, setMapCenter] = useState<[number, number]>(getInitialCenter);
   const [mapZoom, setMapZoom] = useState<number>(11);
   const [minZoom, setMinZoom] = useState(11);
-  // const { setSelectedStation } = useStation();
+  const { setSelectedStation } = useStation();
 
-  /* useEffect(() => {
+  useEffect(() => {
     fetch('/api/proxy-stations')
       .then(res => res.json())
       .then(setStations)
       .catch(console.error);
-  }, []); */
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -56,14 +56,14 @@ export default function LeafletMap() {
     }
   }, []);
 
-  /* const getColor = (rainfall: number) => {
+  const getColor = (rainfall: number) => {
     if (rainfall > 204.4) return 'red';
     if (rainfall > 115.5) return 'orange';
     if (rainfall > 64.4) return 'yellow';
     if (rainfall > 15.5) return 'skyblue';
     if (rainfall > 0) return 'lightgreen';
     return 'grey';
-  }; */
+  };
 
   return (
     <div
@@ -85,25 +85,24 @@ export default function LeafletMap() {
         attributionControl={false}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        {/* Temporarily commented out station markers
         {stations.length > 0 && stations.map(station => (
           <CircleMarker
-            key={station.id}
-            center={[station.latitude, station.longitude]}
-            radius={8}
-            color="black"
-            fillColor={getColor(station.rainfall)}
-            fillOpacity={1}
-            eventHandlers={{
-              click: () => setSelectedStation({ ...station, station_id: station.station_id ?? station.id })
-            }}
-          >
-            <Tooltip permanent={false} direction="top" offset={[0, -10]}>
-              {station.name} ({station.rainfall.toFixed(2)} mm)
-            </Tooltip>
-          </CircleMarker>
+          key={station.id}
+          center={[station.latitude, station.longitude]}
+          radius={8}
+          color="black"
+          weight={1.5} // <-- add this line to reduce border thickness
+          fillColor={getColor(station.rainfall)}
+          fillOpacity={1}
+          eventHandlers={{
+            click: () => setSelectedStation({ ...station, station_id: station.station_id ?? station.id })
+          }}
+        >
+          <Tooltip permanent={false} direction="top" offset={[0, -10]}>
+            {station.name} ({station.rainfall.toFixed(2)} mm)
+          </Tooltip>
+        </CircleMarker>
         ))}
-        */}
       </MapContainer>
     </div>
   );

@@ -13,10 +13,9 @@ export default function Legend({ mobile = false }: { mobile?: boolean }) {
   const [date, setDate] = useState<string>('');
 
   useEffect(() => {
-    // Get tomorrow's date
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const formattedDate = tomorrow.toLocaleDateString('en-US', {
+    // Get today's date
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'long',
       day: 'numeric',

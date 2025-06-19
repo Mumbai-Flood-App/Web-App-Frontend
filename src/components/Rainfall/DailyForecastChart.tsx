@@ -156,11 +156,8 @@ export default function DailyForecastChart({ selectedStation }: Props) {
 
         // Map for chart rendering
         const processedData: ProcessedDataPoint[] = displayData.map(item => {
-          const itemDate = new Date(item.date);
-          const itemDay = itemDate.getDate();
-          
           // Explicitly check if the date is before today
-          const isPastDate = itemDate.getTime() < new Date(currentYear, currentMonth, today).getTime();
+          const isPastDate = new Date(item.date).getTime() < new Date(currentYear, currentMonth, today).getTime();
 
           return {
             date: formatDateToIST(item.date),

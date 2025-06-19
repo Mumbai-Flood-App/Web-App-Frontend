@@ -137,7 +137,6 @@ export default function DailyForecastChart({ selectedStation }: Props) {
         
         // Process and deduplicate data
         dailyApiData.forEach(item => {
-          const itemDate = new Date(item.date);
           if (!dataMap.has(item.date) || item.is_forecasted) {
             dataMap.set(item.date, item);
           }

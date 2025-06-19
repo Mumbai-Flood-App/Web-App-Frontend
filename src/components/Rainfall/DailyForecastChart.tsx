@@ -115,6 +115,35 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     );
   };
 
+  // Helper to remove duplicate days by originalDate (YYYY-MM-DD)
+  function uniqueByDate(data: ProcessedDataPoint[]) {
+    const seen = new Set();
+    return data.filter(item => {
+      const day = (item.originalDate || '').slice(0, 10);
+      if (seen.has(day)) return false;
+      seen.add(day);
+      return true;
+    });
+  }
+
+  // Helper to check if a date is today
+  function isToday(dateStr: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const d = new Date(dateStr);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime() === today.getTime();
+  }
+
+  // Helper to check if a date is in the future
+  function isFuture(dateStr: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const d = new Date(dateStr);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime() > today.getTime();
+  }
+
   useEffect(() => {
     if (!selectedStation) {
       setDailyData([]);
@@ -123,31 +152,48 @@ export default function DailyForecastChart({ selectedStation }: Props) {
 
     setLoading(true);
     setError(null);
-    
+
     fetchStationData(selectedStation.station_id)
       .then((response: { daily_data: DailyDataPoint[] }) => {
-        const dailyApiData = response.daily_data || [];
-        
-        // Process the data - create separate entries for past vs future
-        const processedData: ProcessedDataPoint[] = dailyApiData.map(item => ({
-          date: formatDateToIST(item.date),
-          observed: !item.is_forecasted ? item.observed : 0,
-          predicted: item.is_forecasted ? item.predicted : 0,
-          pastPredicted: !item.is_forecasted && item.predicted > 0 ? item.predicted : 0,
-          isForecasted: item.is_forecasted,
-          originalDate: item.date
-        }));
+        let dailyApiData = response.daily_data || [];
+        // Sort by date ascending
+        dailyApiData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-        // Find today's date for separator
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayIndex = processedData.findIndex(item => {
-          const itemDate = new Date(item.originalDate || '');
-          itemDate.setHours(0, 0, 0, 0);
-          return itemDate.getTime() === today.getTime();
+        // Find today's index
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const todayIdx = dailyApiData.findIndex(d => d.date === todayStr);
+
+        // Slice to get last 2 past days, today, and next 2 days
+        let displayData: DailyDataPoint[] = [];
+        if (todayIdx !== -1) {
+          const start = Math.max(0, todayIdx - 2);
+          const end = todayIdx + 3; // today + 2 days ahead
+          displayData = dailyApiData.slice(start, end);
+        } else {
+          displayData = dailyApiData.slice(-5);
+        }
+
+        // Map for chart rendering
+        const processedData: ProcessedDataPoint[] = displayData.map(item => {
+          const dateObj = new Date(item.date);
+          const todayObj = new Date();
+          todayObj.setHours(0, 0, 0, 0);
+          dateObj.setHours(0, 0, 0, 0);
+          const isTodayOrFuture = dateObj.getTime() >= todayObj.getTime();
+          return {
+            date: formatDateToIST(item.date),
+            observed: 0, // ignore for now
+            predicted: isTodayOrFuture || item.is_forecasted ? item.predicted : 0,
+            pastPredicted: !isTodayOrFuture && !item.is_forecasted && item.predicted > 0 ? item.predicted : 0,
+            isForecasted: item.is_forecasted,
+            originalDate: item.date
+          };
         });
 
-        setSeparatorDate(processedData[todayIndex]?.date || '');
+        // Set separator to yesterday
+        const yesterdayStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        setSeparatorDate(processedData.find(item => item.originalDate === yesterdayStr)?.date || '');
+
         setDailyData(processedData);
         setLoading(false);
       })
@@ -268,10 +314,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
             isAnimationActive={false}
           >
             {dailyData.map((entry, idx) => (
-              <Cell 
-                key={`past-predicted-${idx}`} 
-                fill="#FFFFFF"
-              />
+              <Cell key={`past-predicted-${idx}`} fill={entry.pastPredicted > 0 ? '#FFFFFF' : 'transparent'} />
             ))}
           </Bar>
           
@@ -295,10 +338,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
             isAnimationActive={false}
           >
             {dailyData.map((entry, idx) => (
-              <Cell 
-                key={`predicted-${idx}`} 
-                fill={entry.predicted > 0 ? getColor(entry.predicted) : 'transparent'} 
-              />
+              <Cell key={`predicted-${idx}`} fill={entry.predicted > 0 ? getColor(entry.predicted) : 'transparent'} />
             ))}
           </Bar>
         </BarChart>

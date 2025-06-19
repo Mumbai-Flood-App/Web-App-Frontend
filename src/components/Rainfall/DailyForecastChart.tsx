@@ -149,8 +149,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
 
         // Get the display range (2 days before today to 2 days after today)
         const displayData = uniqueData.filter(item => {
-          const itemDate = new Date(item.date);
-          const dayDiff = Math.floor((itemDate.getTime() - istDate.getTime()) / (1000 * 60 * 60 * 24));
+          const dayDiff = Math.floor((new Date(item.date).getTime() - istDate.getTime()) / (1000 * 60 * 60 * 24));
           return dayDiff >= -2 && dayDiff <= 2;
         });
 

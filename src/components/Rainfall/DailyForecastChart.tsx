@@ -125,43 +125,56 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     fetchStationData(selectedStation.station_id)
       .then((response: { daily_data: DailyDataPoint[] }) => {
         const dailyApiData = response.daily_data || [];
-        // Sort by date ascending
-        dailyApiData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        
+        // Get current date in IST
+        const istDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+        const today = istDate.getDate();
+        const currentMonth = istDate.getMonth();
+        const currentYear = istDate.getFullYear();
+        
+        // Create a map to store unique data points by date
+        const dataMap = new Map<string, DailyDataPoint>();
+        
+        // Process and deduplicate data
+        dailyApiData.forEach(item => {
+          const itemDate = new Date(item.date);
+          if (!dataMap.has(item.date) || item.is_forecasted) {
+            dataMap.set(item.date, item);
+          }
+        });
 
-        // Find today's index
-        const todayStr = new Date().toISOString().slice(0, 10);
-        const todayIdx = dailyApiData.findIndex(d => d.date === todayStr);
+        // Convert map back to array and sort by date
+        const uniqueData = Array.from(dataMap.values())
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-        // Slice to get last 2 past days, today, and next 2 days
-        let displayData: DailyDataPoint[] = [];
-        if (todayIdx !== -1) {
-          const start = Math.max(0, todayIdx - 2);
-          const end = todayIdx + 3; // today + 2 days ahead
-          displayData = dailyApiData.slice(start, end);
-        } else {
-          displayData = dailyApiData.slice(-5);
-        }
+        // Get the display range (2 days before today to 2 days after today)
+        const displayData = uniqueData.filter(item => {
+          const itemDate = new Date(item.date);
+          const dayDiff = Math.floor((itemDate.getTime() - istDate.getTime()) / (1000 * 60 * 60 * 24));
+          return dayDiff >= -2 && dayDiff <= 2;
+        });
 
         // Map for chart rendering
         const processedData: ProcessedDataPoint[] = displayData.map(item => {
-          const dateObj = new Date(item.date);
-          const todayObj = new Date();
-          todayObj.setHours(0, 0, 0, 0);
-          dateObj.setHours(0, 0, 0, 0);
-          const isTodayOrFuture = dateObj.getTime() >= todayObj.getTime();
+          const itemDate = new Date(item.date);
+          const itemDay = itemDate.getDate();
+          
+          // Explicitly check if the date is before today
+          const isPastDate = itemDate.getTime() < new Date(currentYear, currentMonth, today).getTime();
+
           return {
             date: formatDateToIST(item.date),
-            observed: 0, // ignore for now
-            predicted: isTodayOrFuture || item.is_forecasted ? item.predicted : 0,
-            pastPredicted: !isTodayOrFuture && !item.is_forecasted && item.predicted > 0 ? item.predicted : 0,
-            isForecasted: item.is_forecasted,
+            observed: 0,
+            predicted: isPastDate ? 0 : item.predicted,
+            pastPredicted: isPastDate ? item.predicted : 0,
+            isForecasted: !isPastDate,
             originalDate: item.date
           };
         });
 
-        // Set separator to yesterday
-        const yesterdayStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-        setSeparatorDate(processedData.find(item => item.originalDate === yesterdayStr)?.date || '');
+        // Set separator to today (it will appear right before today's bar)
+        const todayStr = new Date(currentYear, currentMonth, today).toISOString().slice(0, 10);
+        setSeparatorDate(processedData.find(item => item.originalDate === todayStr)?.date || '');
 
         setDailyData(processedData);
         setLoading(false);

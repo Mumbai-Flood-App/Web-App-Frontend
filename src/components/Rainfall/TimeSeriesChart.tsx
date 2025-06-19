@@ -59,31 +59,22 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
   // Generate tick values for hourly intervals
   const getTickValues = (data: ObservedDataPoint[]) => {
     if (!data || data.length === 0) return [];
-
-    // Filter for timestamps that are exactly on the hour
-    const hourlyTimestamps = data
-      .map(d => d.timestamp)
-      .filter(ts => {
-        const date = new Date(ts);
-        return date.getMinutes() === 0 && date.getSeconds() === 0;
-      });
-
-    // Use all hourly timestamps if available, max 6 ticks
-    if (hourlyTimestamps.length >= 1) {
-      const step = Math.max(1, Math.floor(hourlyTimestamps.length / 5));
-      const ticks = [];
-      for (let i = 0; i < hourlyTimestamps.length; i += step) {
-        ticks.push(hourlyTimestamps[i]);
-        if (ticks.length >= 6) break;
-      }
-      if (ticks[ticks.length - 1] !== hourlyTimestamps[hourlyTimestamps.length - 1]) {
-        ticks.push(hourlyTimestamps[hourlyTimestamps.length - 1]);
-      }
-      return ticks;
-    } else {
-      // Fallback: use the first and last if no hourly data
-      return [data[0].timestamp, data[data.length - 1].timestamp];
+    const maxTicks = 5;
+    const dataLength = data.length;
+    if (dataLength <= maxTicks) {
+      return data.map(d => d.timestamp);
     }
+    const step = Math.floor(dataLength / (maxTicks - 1));
+    const ticks = [];
+    for (let i = 0; i < dataLength; i += step) {
+      ticks.push(data[i].timestamp);
+      if (ticks.length >= maxTicks - 1) break;
+    }
+    // Always include the last timestamp
+    if (ticks[ticks.length - 1] !== data[dataLength - 1].timestamp) {
+      ticks.push(data[dataLength - 1].timestamp);
+    }
+    return ticks;
   };
 
   const CustomTooltip = ({ active, payload, label }: { 
@@ -146,12 +137,15 @@ export default function TimeSeriesChart({ selectedStation }: Props) {
 
   const maxRainfall = Math.max(...data.map(d => d.rainfall));
   const yDomainMax = Math.ceil(maxRainfall / 5) * 5 || 5;
-  const tickValues = getTickValues(data);
+
+  // Only keep the last 5 data points (last 5 hours)
+  const lastFiveData = data.slice(-5);
+  const tickValues = getTickValues(lastFiveData);
 
   return (
     <div className="w-full h-full bg-black rounded-lg p-2">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 15, left: -10, bottom: 2 }}>
+        <AreaChart data={lastFiveData} margin={{ top: 10, right: 15, left: -10, bottom: 2 }}>
           <defs>
             <linearGradient id="rainfallGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>

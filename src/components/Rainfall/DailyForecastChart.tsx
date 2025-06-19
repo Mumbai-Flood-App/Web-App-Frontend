@@ -91,14 +91,12 @@ export default function DailyForecastChart({ selectedStation }: Props) {
   
     const data = payload[0].payload;
     // Determine color for predicted
-    const predictedColor = data.isForecasted
-      ? getColor(data.predicted) // future predicted
-      : "#FFFFFF"; // past predicted (white bar)
+    const predictedColor = data.predicted > 0 ? getColor(data.predicted) : "#FFFFFF";
   
     return (
       <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
         <p className="text-white text-sm font-bold">{label}</p>
-        {data.isForecasted ? (
+        {(data.isForecasted || data.predicted > 0) ? (
           <p className="text-sm font-bold" style={{ color: predictedColor }}>
             <span className="font-bold">Predicted:</span> {data.predicted?.toFixed(2)}mm
           </p>
@@ -115,35 +113,6 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     );
   };
 
-  // Helper to remove duplicate days by originalDate (YYYY-MM-DD)
-  function uniqueByDate(data: ProcessedDataPoint[]) {
-    const seen = new Set();
-    return data.filter(item => {
-      const day = (item.originalDate || '').slice(0, 10);
-      if (seen.has(day)) return false;
-      seen.add(day);
-      return true;
-    });
-  }
-
-  // Helper to check if a date is today
-  function isToday(dateStr: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const d = new Date(dateStr);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime() === today.getTime();
-  }
-
-  // Helper to check if a date is in the future
-  function isFuture(dateStr: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const d = new Date(dateStr);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime() > today.getTime();
-  }
-
   useEffect(() => {
     if (!selectedStation) {
       setDailyData([]);
@@ -155,7 +124,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
 
     fetchStationData(selectedStation.station_id)
       .then((response: { daily_data: DailyDataPoint[] }) => {
-        let dailyApiData = response.daily_data || [];
+        const dailyApiData = response.daily_data || [];
         // Sort by date ascending
         dailyApiData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 

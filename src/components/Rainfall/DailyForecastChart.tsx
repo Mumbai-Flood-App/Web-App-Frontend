@@ -138,16 +138,14 @@ export default function DailyForecastChart({ selectedStation }: Props) {
 
         // Always show the last 5 days in the data
         const lastFive = apiData.slice(-5);
-        // The latest date in the data is always the last element
-        const latestDate = lastFive[lastFive.length - 1].date;
-        // The current day is the latest non-forecasted date in the lastFive
-        const currentDayObj = [...lastFive].reverse().find(d => !d.is_forecasted);
-        const currentDay = currentDayObj ? currentDayObj.date : latestDate;
 
         const processedData: ProcessedDataPoint[] = lastFive.map(item => {
-          // Past predicted: not forecasted
+          // These variables are only used here to determine the state of each bar.
+          const latestDate = lastFive[lastFive.length - 1].date;
+          const currentDayObj = [...lastFive].reverse().find(d => !d.is_forecasted);
+          const currentDay = currentDayObj ? currentDayObj.date : latestDate;
+
           const isPastPredicted = !item.is_forecasted;
-          // Forecasted: is_forecasted true
           const isForecasted = item.is_forecasted;
         
           return {

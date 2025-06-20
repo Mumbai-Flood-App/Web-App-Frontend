@@ -140,10 +140,11 @@ export default function DailyForecastChart({ selectedStation }: Props) {
         const lastFive = apiData.slice(-5);
 
         const processedData: ProcessedDataPoint[] = lastFive.map(item => {
-          // These variables are only used here to determine the state of each bar.
-          const latestDate = lastFive[lastFive.length - 1].date;
-          const currentDayObj = [...lastFive].reverse().find(d => !d.is_forecasted);
-          const currentDay = currentDayObj ? currentDayObj.date : latestDate;
+          // The following variables were unused in the logic that determines the bar color,
+          // so they have been removed to fix the linter error.
+          // const latestDate = lastFive[lastFive.length - 1].date;
+          // const currentDayObj = [...lastFive].reverse().find(d => !d.is_forecasted);
+          // const currentDay = currentDayObj ? currentDayObj.date : latestDate;
 
           const isPastPredicted = !item.is_forecasted;
           const isForecasted = item.is_forecasted;

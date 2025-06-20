@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { fetchStationData } from '../../utils/RainfallApis';
 
 const LEGEND = [
     { color: "bg-gray-400", label: "No Rain (0 mm)" },
@@ -10,17 +11,37 @@ const LEGEND = [
   ];
   
 export default function Legend({ mobile = false }: { mobile?: boolean }) {
-  const [date, setDate] = useState<string>('');
+  const [date, setDate] = useState<string>('Loading...');
 
   useEffect(() => {
-    // Get today's date
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'long',
-      day: 'numeric',
-    });
-    setDate(formattedDate);
+    // Fetch data for a default station (e.g., 22) to determine the forecast date.
+    fetchStationData(22) 
+      .then(data => {
+        const dailyData = data.daily_data || [];
+        if (dailyData.length > 0) {
+          // Find the last day with observed data (is_forecasted: false).
+          const lastObservedDay = [...dailyData].reverse().find(d => !d.is_forecasted);
+          
+          if (lastObservedDay) {
+            // The legend should show the date for the NEXT day's forecast.
+            const forecastDate = new Date(lastObservedDay.date + 'T00:00:00Z');
+            forecastDate.setDate(forecastDate.getDate() + 1);
+
+            const formattedDate = forecastDate.toLocaleDateString('en-IN', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              timeZone: 'Asia/Kolkata', // Ensure consistent timezone display
+            });
+            setDate(formattedDate);
+          } else {
+            setDate('Date not available');
+          }
+        }
+      })
+      .catch(() => {
+        setDate('Error loading date');
+      });
   }, []);
 
   return (

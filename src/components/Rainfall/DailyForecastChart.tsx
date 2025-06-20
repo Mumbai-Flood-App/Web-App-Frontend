@@ -58,13 +58,15 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     return '#D4D4D4';
   };
 
-  const formatDateToIST = (date: string): string => {
+  const formatDateToIST = (dateString: string): string => {
+    // Treat the YYYY-MM-DD string as UTC midnight to prevent timezone shifts during parsing.
+    const utcDate = new Date(`${dateString}T00:00:00Z`);
     const options: Intl.DateTimeFormatOptions = { 
       day: '2-digit', 
       month: 'short', 
-      timeZone: 'Asia/Kolkata' 
+      timeZone: 'Asia/Kolkata' // Display the date as it would appear in India.
     };
-    return new Date(date).toLocaleDateString('en-IN', options);
+    return utcDate.toLocaleDateString('en-IN', options);
   };
 
   // Custom Legend Component
@@ -124,52 +126,44 @@ export default function DailyForecastChart({ selectedStation }: Props) {
 
     fetchStationData(selectedStation.station_id)
       .then((response: { daily_data: DailyDataPoint[] }) => {
-        const dailyApiData = response.daily_data || [];
+        const apiData = response.daily_data || [];
+        if (apiData.length === 0) {
+          setDailyData([]);
+          setLoading(false);
+          return;
+        }
+
+        // Sort by date ascending
+        apiData.sort((a, b) => a.date.localeCompare(b.date));
+
+        // Always show the last 5 days in the data
+        const lastFive = apiData.slice(-5);
+        // The latest date in the data is always the last element
+        const latestDate = lastFive[lastFive.length - 1].date;
+        // The current day is the latest non-forecasted date in the lastFive
+        const currentDayObj = [...lastFive].reverse().find(d => !d.is_forecasted);
+        const currentDay = currentDayObj ? currentDayObj.date : latestDate;
+
+        const processedData: ProcessedDataPoint[] = lastFive.map(item => {
+          // Past predicted: not forecasted
+          const isPastPredicted = !item.is_forecasted;
+          // Forecasted: is_forecasted true
+          const isForecasted = item.is_forecasted;
         
-        // Get current date in IST
-        const istDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-        const today = istDate.getDate();
-        const currentMonth = istDate.getMonth();
-        const currentYear = istDate.getFullYear();
-        
-        // Create a map to store unique data points by date
-        const dataMap = new Map<string, DailyDataPoint>();
-        
-        // Process and deduplicate data
-        dailyApiData.forEach(item => {
-          if (!dataMap.has(item.date) || item.is_forecasted) {
-            dataMap.set(item.date, item);
-          }
-        });
-
-        // Convert map back to array and sort by date
-        const uniqueData = Array.from(dataMap.values())
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-        // Get the display range (2 days before today to 2 days after today)
-        const displayData = uniqueData.filter(item => {
-          const dayDiff = Math.floor((new Date(item.date).getTime() - istDate.getTime()) / (1000 * 60 * 60 * 24));
-          return dayDiff >= -2 && dayDiff <= 2;
-        });
-
-        // Map for chart rendering
-        const processedData: ProcessedDataPoint[] = displayData.map(item => {
-          // Explicitly check if the date is before today
-          const isPastDate = new Date(item.date).getTime() < new Date(currentYear, currentMonth, today).getTime();
-
           return {
             date: formatDateToIST(item.date),
             observed: 0,
-            predicted: isPastDate ? 0 : item.predicted,
-            pastPredicted: isPastDate ? item.predicted : 0,
-            isForecasted: !isPastDate,
-            originalDate: item.date
+            predicted: isForecasted ? item.predicted : 0,
+            pastPredicted: isPastPredicted ? item.predicted : 0,
+            isForecasted: isForecasted,
+            originalDate: item.date,
           };
         });
-
-        // Set separator to today (it will appear right before today's bar)
-        const todayStr = new Date(currentYear, currentMonth, today).toISOString().slice(0, 10);
-        setSeparatorDate(processedData.find(item => item.originalDate === todayStr)?.date || '');
+        
+        // Separator before the first forecasted bar
+        const firstForecasted = processedData.find(d => d.isForecasted);
+        const separatorDateLabel = firstForecasted?.date;
+        setSeparatorDate(separatorDateLabel || '');
 
         setDailyData(processedData);
         setLoading(false);

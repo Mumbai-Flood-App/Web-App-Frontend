@@ -59,24 +59,21 @@ export default function DailyForecastChart({ selectedStation }: Props) {
   };
 
   const formatDateToIST = (dateString: string): string => {
-    // Treat the YYYY-MM-DD string as UTC midnight to prevent timezone shifts during parsing.
-    const utcDate = new Date(`${dateString}T00:00:00Z`);
+    // Parse the date string directly without timezone conversion to avoid midnight issues
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    
     const options: Intl.DateTimeFormatOptions = { 
       day: '2-digit', 
-      month: 'short', 
-      timeZone: 'Asia/Kolkata' // Display the date as it would appear in India.
+      month: 'short'
     };
-    return utcDate.toLocaleDateString('en-IN', options);
+    return date.toLocaleDateString('en-IN', options);
   };
 
   // Custom Legend Component
   const CustomLegend = () => {
     return (
       <div className="flex justify-center items-center space-x-6 mt-2 text-xs text-gray-300">
-        {/* <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-gray-400 rounded-sm"></div>
-          <span>Observed</span>
-        </div> */}
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-white border border-gray-400 rounded-sm"></div>
           <span>Past Predicted</span>
@@ -136,16 +133,30 @@ export default function DailyForecastChart({ selectedStation }: Props) {
         // Sort by date ascending
         apiData.sort((a, b) => a.date.localeCompare(b.date));
 
-        // Always show the last 5 days in the data
-        const lastFive = apiData.slice(-5);
+        // Find the last observed day (non-forecasted)
+        const lastObservedIndex = [...apiData].reverse().findIndex(d => !d.is_forecasted);
+        const lastObservedDay = lastObservedIndex !== -1 ? apiData[apiData.length - 1 - lastObservedIndex] : null;
+        
+        // Create a window: 2 days before last observed + last observed + 3 days after
+        let startIndex = 0;
+        let endIndex = apiData.length;
+        
+        if (lastObservedDay) {
+          const lastObservedDate = lastObservedDay.date;
+          const lastObservedDateIndex = apiData.findIndex(d => d.date === lastObservedDate);
+          
+          // Get 2 days before and 3 days after the last observed day
+          startIndex = Math.max(0, lastObservedDateIndex - 2);
+          endIndex = Math.min(apiData.length, lastObservedDateIndex + 4); // +4 to include 3 future days
+        } else {
+          // If no observed data, just take the last 5 days
+          endIndex = apiData.length;
+          startIndex = Math.max(0, endIndex - 5);
+        }
 
-        const processedData: ProcessedDataPoint[] = lastFive.map(item => {
-          // The following variables were unused in the logic that determines the bar color,
-          // so they have been removed to fix the linter error.
-          // const latestDate = lastFive[lastFive.length - 1].date;
-          // const currentDayObj = [...lastFive].reverse().find(d => !d.is_forecasted);
-          // const currentDay = currentDayObj ? currentDayObj.date : latestDate;
+        const selectedData = apiData.slice(startIndex, endIndex);
 
+        const processedData: ProcessedDataPoint[] = selectedData.map(item => {
           const isPastPredicted = !item.is_forecasted;
           const isForecasted = item.is_forecasted;
         
@@ -159,12 +170,17 @@ export default function DailyForecastChart({ selectedStation }: Props) {
           };
         });
         
+        // Remove duplicates based on formatted date
+        const uniqueData = processedData.filter((item, index, self) => 
+          index === self.findIndex(t => t.date === item.date)
+        );
+        
         // Separator before the first forecasted bar
-        const firstForecasted = processedData.find(d => d.isForecasted);
+        const firstForecasted = uniqueData.find(d => d.isForecasted);
         const separatorDateLabel = firstForecasted?.date;
         setSeparatorDate(separatorDateLabel || '');
 
-        setDailyData(processedData);
+        setDailyData(uniqueData);
         setLoading(false);
       })
       .catch(err => {

@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, Cell } from 'recharts';
-import { fetchStationData } from '../../utils/RainfallApis';
+import { fetchStationData, fetchHourlyAWSData } from '../../utils/RainfallApis';
 
 interface DailyDataPoint {
   date: string;
@@ -9,6 +9,11 @@ interface DailyDataPoint {
   predicted: number;
   is_forecasted: boolean;
   originalDate?: string;
+}
+
+interface HourlyDataPoint {
+  timestamp: string;
+  rainfall: number;
 }
 
 interface ProcessedDataPoint {
@@ -70,10 +75,37 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     return date.toLocaleDateString('en-IN', options);
   };
 
+  // Aggregate hourly data by day
+  const aggregateHourlyDataByDay = (hourlyData: HourlyDataPoint[]): Record<string, number> => {
+    const dailyAggregates: Record<string, number> = {};
+    
+    hourlyData.forEach(item => {
+      // Parse timestamp - it's already in IST format like "2025-06-21T13:45:00+05:30"
+      const timestamp = new Date(item.timestamp);
+      
+      // Extract date directly from the timestamp (it's already in IST)
+      const year = timestamp.getFullYear();
+      const month = String(timestamp.getMonth() + 1).padStart(2, '0');
+      const day = String(timestamp.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
+      
+      if (!dailyAggregates[dateKey]) {
+        dailyAggregates[dateKey] = 0;
+      }
+      dailyAggregates[dateKey] += item.rainfall;
+    });
+    
+    return dailyAggregates;
+  };
+
   // Custom Legend Component
   const CustomLegend = () => {
     return (
       <div className="flex justify-center items-center space-x-6 mt-2 text-xs text-gray-300">
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 bg-gray-400 rounded-sm"></div>
+          <span>Observed</span>
+        </div>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-white border border-gray-400 rounded-sm"></div>
           <span>Past Predicted</span>
@@ -95,6 +127,11 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     return (
       <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
         <p className="text-white text-sm font-bold">{label}</p>
+        {data.observed > 0 && (
+          <p className="text-gray-400 text-sm font-bold">
+            <span className="font-bold">Observed:</span> {data.observed?.toFixed(2)}mm
+          </p>
+        )}
         {(data.isForecasted || data.predicted > 0) ? (
           <p className="text-sm font-bold" style={{ color: predictedColor }}>
             <span className="font-bold">Predicted:</span> {data.predicted?.toFixed(2)}mm
@@ -121,20 +158,29 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     setLoading(true);
     setError(null);
 
-    fetchStationData(selectedStation.station_id)
-      .then((response: { daily_data: DailyDataPoint[] }) => {
-        const apiData = response.daily_data || [];
+    // Fetch both daily forecast data and hourly observed data
+    Promise.all([
+      fetchStationData(selectedStation.station_id),
+      fetchHourlyAWSData(selectedStation.station_id)
+    ])
+      .then(([forecastResponse, hourlyData]) => {
+        const apiData = forecastResponse.daily_data || [];
+        const hourlyObservedData = hourlyData || [];
+        
         if (apiData.length === 0) {
           setDailyData([]);
           setLoading(false);
           return;
         }
 
+        // Aggregate hourly data by day
+        const dailyObservedAggregates = aggregateHourlyDataByDay(hourlyObservedData);
+
         // Sort by date ascending
-        apiData.sort((a, b) => a.date.localeCompare(b.date));
+        apiData.sort((a: DailyDataPoint, b: DailyDataPoint) => a.date.localeCompare(b.date));
 
         // Find the last observed day (non-forecasted)
-        const lastObservedIndex = [...apiData].reverse().findIndex(d => !d.is_forecasted);
+        const lastObservedIndex = [...apiData].reverse().findIndex((d: DailyDataPoint) => !d.is_forecasted);
         const lastObservedDay = lastObservedIndex !== -1 ? apiData[apiData.length - 1 - lastObservedIndex] : null;
         
         // Create a window: 2 days before last observed + last observed + 3 days after
@@ -143,7 +189,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
         
         if (lastObservedDay) {
           const lastObservedDate = lastObservedDay.date;
-          const lastObservedDateIndex = apiData.findIndex(d => d.date === lastObservedDate);
+          const lastObservedDateIndex = apiData.findIndex((d: DailyDataPoint) => d.date === lastObservedDate);
           
           // Get 2 days before and 3 days after the last observed day
           startIndex = Math.max(0, lastObservedDateIndex - 2);
@@ -156,13 +202,16 @@ export default function DailyForecastChart({ selectedStation }: Props) {
 
         const selectedData = apiData.slice(startIndex, endIndex);
 
-        const processedData: ProcessedDataPoint[] = selectedData.map(item => {
+        const processedData: ProcessedDataPoint[] = selectedData.map((item: DailyDataPoint) => {
           const isPastPredicted = !item.is_forecasted;
           const isForecasted = item.is_forecasted;
+          
+          // Get observed data for this date
+          const observedValue = dailyObservedAggregates[item.date] || 0;
         
           return {
             date: formatDateToIST(item.date),
-            observed: 0,
+            observed: observedValue,
             predicted: isForecasted ? item.predicted : 0,
             pastPredicted: isPastPredicted ? item.predicted : 0,
             isForecasted: isForecasted,
@@ -305,7 +354,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
           </Bar>
           
           {/* Observed bars - Gray, stacked with past predicted for side-by-side effect */}
-          {/* <Bar 
+          <Bar 
             dataKey="observed" 
             stackId="observed" 
             radius={[2, 2, 0, 0]}
@@ -314,7 +363,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
             {dailyData.map((entry, idx) => (
               <Cell key={`observed-${idx}`} fill="#ADADC9" />
             ))}
-          </Bar> */}
+          </Bar>
           
           {/* Future Predicted bars - Colored, separate stack */}
           <Bar 

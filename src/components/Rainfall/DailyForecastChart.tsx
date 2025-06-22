@@ -127,7 +127,7 @@ export default function DailyForecastChart({ selectedStation }: Props) {
     return (
       <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
         <p className="text-white text-sm font-bold">{label}</p>
-        {data.observed > 0 && (
+        {typeof data.observed === 'number' && (
           <p className="text-gray-400 text-sm font-bold">
             <span className="font-bold">Observed:</span> {data.observed?.toFixed(2)}mm
           </p>
@@ -176,6 +176,9 @@ export default function DailyForecastChart({ selectedStation }: Props) {
         // Aggregate hourly data by day
         const dailyObservedAggregates = aggregateHourlyDataByDay(hourlyObservedData);
 
+        // --- DEBUG LOG ---
+        console.log("DEBUG: Aggregated Daily Observed Rainfall:", dailyObservedAggregates);
+
         // Sort by date ascending
         apiData.sort((a: DailyDataPoint, b: DailyDataPoint) => a.date.localeCompare(b.date));
 
@@ -191,13 +194,14 @@ export default function DailyForecastChart({ selectedStation }: Props) {
           const lastObservedDate = lastObservedDay.date;
           const lastObservedDateIndex = apiData.findIndex((d: DailyDataPoint) => d.date === lastObservedDate);
           
-          // Get 2 days before and 3 days after the last observed day
+          // Keep the start index logic to show the last observed day and two prior.
           startIndex = Math.max(0, lastObservedDateIndex - 2);
-          endIndex = Math.min(apiData.length, lastObservedDateIndex + 4); // +4 to include 3 future days
-        } else {
-          // If no observed data, just take the last 5 days
+          // Set the end index to the full length of the data to show ALL future predictions.
           endIndex = apiData.length;
-          startIndex = Math.max(0, endIndex - 5);
+        } else {
+          // Fallback for when there is no observed data.
+          endIndex = apiData.length;
+          startIndex = Math.max(0, endIndex - 6);
         }
 
         const selectedData = apiData.slice(startIndex, endIndex);

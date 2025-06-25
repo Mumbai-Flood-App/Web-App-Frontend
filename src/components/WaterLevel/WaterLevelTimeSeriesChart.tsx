@@ -1,6 +1,5 @@
 import React, { useEffect, useState, ReactElement } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import type { TooltipProps } from 'recharts';
 import type { WaterLevelStation } from '../../contexts/WaterLevelStationContext';
 import { fetchWaterLevelData } from '../../utils/WaterLevelApis';
 

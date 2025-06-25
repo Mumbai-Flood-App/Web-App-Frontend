@@ -133,22 +133,14 @@ const ReportedFloods: React.FC<FormProps> = ({
             });
             setLocation(curr_location);
             setGpsLocation({ lat: position.coords.latitude, long: position.coords.longitude });
-          } catch (error) {
+          } catch {
             // ignore
           }
         },
-        error => {
+        () => {
           // ignore
         }
       );
-    }
-  };
-
-  const handlePinDropToggle = () => {
-    if (!gpslocation) {
-      setCsPinToggle?.(!csPinToggle);
-      setCsPinDropLocation?.(null);
-      setLocation('');
     }
   };
 
@@ -161,7 +153,7 @@ const ReportedFloods: React.FC<FormProps> = ({
             long: csPinDropLocation.long,
           });
           setLocation(curr_location);
-        } catch (error) {
+        } catch {
           // ignore
         }
       })();

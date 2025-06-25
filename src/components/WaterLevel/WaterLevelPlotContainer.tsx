@@ -5,6 +5,7 @@ import WaterLevelStationSelector from './WaterLevelStationSelector';
 import { useWaterLevelStation } from '../../contexts/WaterLevelStationContext';
 import WaterLevelAverages from './WaterLevelAverages';
 import { fetchSensorList } from '../../utils/WaterLevelApis';
+import WaterLevelTimeSeriesChart from './WaterLevelTimeSeriesChart';
 
 export default function WaterLevelPlotContainer({ sidebarOpen = true, mobile = false }: { sidebarOpen?: boolean; mobile?: boolean }) {
   const [currentDate, setCurrentDate] = useState('');
@@ -76,10 +77,10 @@ export default function WaterLevelPlotContainer({ sidebarOpen = true, mobile = f
         </div>
         <div className="mb-6 px-4">
           <div className="text-sm font-semibold mb-3 text-left text-white">
-            Water Level Chart
+            Water Level Over Time
           </div>
-          <div className="w-full h-[200px] flex items-center justify-center bg-gray-900/50 rounded-lg border border-gray-700">
-            <span className="text-gray-400 text-lg">Water Level Chart Coming Soon...</span>
+          <div className="w-full h-[220px] flex items-center justify-center bg-black rounded-lg">
+            <WaterLevelTimeSeriesChart station={selectedStation} />
           </div>
         </div>
       </div>
@@ -122,9 +123,13 @@ export default function WaterLevelPlotContainer({ sidebarOpen = true, mobile = f
         <WaterLevelAverages station={selectedStation} />
       </div>
 
-      {/* Placeholder for future water level chart */}
-      <div className="absolute top-[120px] left-[18px] w-[400px] h-[400px] flex items-center justify-center">
-        <span className="text-gray-400 text-lg">Water Level Chart Coming Soon...</span>
+      <div className="absolute top-[280px] left-[18px] w-[400px]">
+        <div className="text-sm font-semibold mb-3 text-left text-white">
+          Water Level Over Time
+        </div>
+        <div className="w-full h-[220px] flex items-center justify-center bg-black rounded-lg">
+          <WaterLevelTimeSeriesChart station={selectedStation} />
+        </div>
       </div>
     </div>
   );

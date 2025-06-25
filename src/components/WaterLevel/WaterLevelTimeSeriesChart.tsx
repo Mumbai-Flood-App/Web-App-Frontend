@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import type { TooltipProps } from 'recharts';
 import type { WaterLevelStation } from '../../contexts/WaterLevelStationContext';
 import { fetchWaterLevelData } from '../../utils/WaterLevelApis';
 
@@ -13,6 +14,12 @@ interface DataPoint {
 interface Props {
   station: WaterLevelStation | null;
 }
+
+type TooltipPayload = {
+  value: number;
+  name: string;
+  [key: string]: any;
+};
 
 export default function WaterLevelTimeSeriesChart({ station }: Props) {
   const [data, setData] = useState<DataPoint[]>([]);
@@ -63,9 +70,9 @@ export default function WaterLevelTimeSeriesChart({ station }: Props) {
   };
   const tickValues = getTickValues(lastFiveHours);
 
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: number }) => {
+  const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
     if (active && payload && payload.length && label) {
-      const date = new Date(label * 1000);
+      const date = new Date(Number(label) * 1000);
       const formattedDate = date.toLocaleDateString('en-IN', {
         month: 'short',
         day: 'numeric',
@@ -77,12 +84,13 @@ export default function WaterLevelTimeSeriesChart({ station }: Props) {
         minute: '2-digit',
         timeZone: 'Asia/Kolkata'
       });
+      const value = payload[0].value;
       return (
         <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-600 rounded-lg p-3 shadow-lg">
           <p className="text-gray-300 text-sm font-bold">{formattedDate}</p>
           <p className="text-gray-300 text-sm font-bold">{formattedTime}</p>
           <p className="text-blue-400 text-sm font-bold">
-            <span className="font-bold">Water Level:</span> {payload[0].value?.toFixed(2)} cm
+            <span className="font-bold">Water Level:</span> {typeof value === 'number' ? value.toFixed(2) : value} cm
           </p>
         </div>
       );

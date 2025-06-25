@@ -2,7 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, Cell } from 'recharts';
 import { fetchStationData, fetchHourlyAWSData } from '../../utils/RainfallApis';
-import type { Station } from '@/types/station';
+
+interface Station {
+  id: number;
+  station_id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  rainfall: number;
+}
 
 interface DailyDataPoint {
   date: string;

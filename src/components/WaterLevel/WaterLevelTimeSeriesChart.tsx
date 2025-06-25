@@ -64,7 +64,7 @@ export default function WaterLevelTimeSeriesChart({ station }: Props): ReactElem
   };
   const tickValues = getTickValues(lastFiveHours);
 
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: number | string | undefined }): React.ReactNode => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value?: number | string }[]; label?: number | string }): React.ReactNode => {
     if (active && Array.isArray(payload) && payload.length && label) {
       const date = new Date(Number(label) * 1000);
       const formattedDate = date.toLocaleDateString('en-IN', {
@@ -79,7 +79,7 @@ export default function WaterLevelTimeSeriesChart({ station }: Props): ReactElem
         timeZone: 'Asia/Kolkata'
       });
       const value = typeof payload[0] === 'object' && payload[0] !== null && 'value' in payload[0]
-        ? (payload[0] as { value?: unknown }).value
+        ? (payload[0] as { value?: number | string }).value
         : undefined;
       let displayValue = '';
       if (typeof value === 'number') displayValue = value.toFixed(2);
@@ -152,7 +152,7 @@ export default function WaterLevelTimeSeriesChart({ station }: Props): ReactElem
             axisLine={{ stroke: '#4b5563', strokeWidth: 2 }}
             tickLine={false}
           />
-          <Tooltip content={(props: { active?: boolean; payload?: any[]; label?: number | string | undefined }): React.ReactNode => {
+          <Tooltip content={(props: { active?: boolean; payload?: { value?: number | string }[]; label?: number | string }): React.ReactNode => {
             const { active, payload, label } = props;
             if (active && Array.isArray(payload) && payload.length) {
               return <CustomTooltip active={active} payload={payload} label={label} />;

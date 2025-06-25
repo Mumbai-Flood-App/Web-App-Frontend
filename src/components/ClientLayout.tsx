@@ -7,6 +7,8 @@ import { usePathname } from "next/navigation";
 import React from "react";
 import PlotContainer from "./Rainfall/PlotContainer";
 import { StationProvider } from "../contexts/StationContext";
+import WaterLevelPlotContainer from './WaterLevel/WaterLevelPlotContainer';
+import { WaterLevelStationProvider } from "../contexts/WaterLevelStationContext";
 
 export default function ClientLayout({
   children,
@@ -15,7 +17,7 @@ export default function ClientLayout({
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
-  const showBanner = !pathname.startsWith("/about");
+  const showBanner = !pathname.startsWith("/about") && !pathname.startsWith("/reported-floods");
 
   return (
     <>
@@ -25,7 +27,7 @@ export default function ClientLayout({
         <div className="hidden lg:block h-screen z-10">
           <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         </div>
-        {/* For rainfall page, wrap both PlotContainer and children in StationProvider */}
+        {/* For rainfall and water-level pages, render the appropriate PlotContainer in the sidebar */}
         {(pathname === "/" || pathname === "/rainfall") ? (
           <StationProvider>
             <div className="hidden md:block">
@@ -33,6 +35,15 @@ export default function ClientLayout({
             </div>
             {children}
           </StationProvider>
+        ) : pathname === "/water-level" ? (
+          <WaterLevelStationProvider>
+            <>
+              <div className="hidden md:block">
+                <WaterLevelPlotContainer sidebarOpen={isSidebarOpen} />
+              </div>
+              {children}
+            </>
+          </WaterLevelStationProvider>
         ) : (
           children
         )}

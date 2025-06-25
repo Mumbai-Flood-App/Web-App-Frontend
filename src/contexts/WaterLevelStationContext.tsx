@@ -9,6 +9,9 @@ export interface WaterLevelStation {
   latitude: number;
   longitude: number;
   address?: string; // optional, for Aurassure API
+  currentValue?: number; // current water level value
+  status?: string; // sensor status
+  lastDataTime?: number; // last data received time
 }
 
 interface WaterLevelStationContextType {

@@ -62,13 +62,18 @@ export default function About() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto h-screen">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-blue-900 text-center mb-8">About the Mumbai Flood Experiment</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-blue-900 text-center mb-8">ABOUT</h1>
         {/* About Section */}
         <section className="mb-8 sm:mb-16">
           <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 text-gray-700 px-4 sm:px-0">
             <p className="text-base sm:text-lg">
-              We are a team of students, faculty, and staff from the Interdisciplinary Programme in
-              Climate Studies (IDPCS) at IIT Bombay, developing an experimental rainfall forecasting
+              We are a team of students, faculty, and staff from {' '}
+              <Link
+                href="https://www.climate.iitb.ac.in/"
+                className="text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                Centre for Climate Studies (CCS)
+              </Link>{' '}at IIT Bombay, developing an experimental rainfall forecasting
               and flood monitoring system to help Mumbai adapt to its persistent monsoon flooding.
             </p>
 

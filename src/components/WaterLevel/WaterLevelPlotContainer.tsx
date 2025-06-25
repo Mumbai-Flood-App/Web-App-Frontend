@@ -4,7 +4,7 @@ import Image from 'next/image';
 import WaterLevelStationSelector from './WaterLevelStationSelector';
 import { useWaterLevelStation } from '../../contexts/WaterLevelStationContext';
 import WaterLevelAverages from './WaterLevelAverages';
-import { fetchWaterStations } from '../../utils/WaterLevelApis';
+import { fetchSensorList } from '../../utils/WaterLevelApis';
 
 export default function WaterLevelPlotContainer({ sidebarOpen = true, mobile = false }: { sidebarOpen?: boolean; mobile?: boolean }) {
   const [currentDate, setCurrentDate] = useState('');
@@ -38,9 +38,16 @@ export default function WaterLevelPlotContainer({ sidebarOpen = true, mobile = f
   useEffect(() => {
     // Set default station on mount if not already selected
     if (!selectedStation) {
-      fetchWaterStations().then((stations) => {
-        const defaultStation = stations.find((s: { name: string }) => s.name === "BMC's 8 MLD plant behind L&T");
-        if (defaultStation) setSelectedStation(defaultStation);
+      fetchSensorList().then((stations) => {
+        console.log('Available stations:', stations.map((s: { id: number; name: string }) => ({ id: s.id, name: s.name })));
+        // Try to find the default station, or use the first available station
+        const defaultStation = stations.find((s: { name: string }) => s.name === "BMC's 8 MLD plant behind L&T") || stations[0];
+        if (defaultStation) {
+          console.log('Setting default station:', defaultStation.name);
+          setSelectedStation(defaultStation);
+        }
+      }).catch(error => {
+        console.error('Error fetching sensor list:', error);
       });
     }
   }, [selectedStation, setSelectedStation]);

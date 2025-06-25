@@ -32,7 +32,7 @@ export default function HeadBanner({ sidebarOpen = true }: { sidebarOpen?: boole
             />
           ))}
         </div>
-        <span className={`font-bold text-white ${fontSize}`}>Mumbai Flood Experiment</span>
+        <span className={`font-bold text-white ${fontSize}`}>MUMBAI FLOOD EXPERIMENT</span>
       </div>
     </div>
   );

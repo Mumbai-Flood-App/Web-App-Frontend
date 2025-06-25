@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import type { LatLngBoundsExpression } from 'leaflet';
 import { useEffect, useState } from 'react';
 import { useWaterLevelStation, WaterLevelStation } from '../../contexts/WaterLevelStationContext';
-import { fetchWaterStations } from '../../utils/WaterLevelApis';
+import { fetchSensorList } from '../../utils/WaterLevelApis';
 
 // Expanded Mumbai bounds to allow more rightward panning
 const mumbaiBounds: LatLngBoundsExpression = [
@@ -27,9 +27,14 @@ export default function WaterLevelMap() {
   const { setSelectedStation } = useWaterLevelStation();
 
   useEffect(() => {
-    fetchWaterStations()
-      .then(setStations)
-      .catch(console.error);
+    fetchSensorList()
+      .then((data) => {
+        console.log('Map loaded stations:', data.map((s: { id: number; name: string }) => ({ id: s.id, name: s.name })));
+        setStations(data);
+      })
+      .catch((error) => {
+        console.error('Error loading stations in map:', error);
+      });
   }, []);
 
   useEffect(() => {
@@ -77,7 +82,10 @@ export default function WaterLevelMap() {
             fillColor="#00BFFF"
             fillOpacity={1}
             eventHandlers={{
-              click: () => setSelectedStation(station)
+              click: () => {
+                console.log('Map: Station clicked:', station.name, 'ID:', station.id);
+                setSelectedStation(station);
+              }
             }}
           >
             <Tooltip permanent={false} direction="top" offset={[0, -10]}>

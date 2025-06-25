@@ -17,15 +17,21 @@ export default function WaterLevelStationSelector({ selected, onChange }: Props)
   useEffect(() => {
     fetchSensorList()
       .then((data) => {
+        console.log('Station selector loaded stations:', data.map((s: { id: number; name: string }) => ({ id: s.id, name: s.name })));
         setStations(data);
         setIsLoading(false);
       })
-      .catch(() => setIsLoading(false));
+      .catch((error) => {
+        console.error('Error loading stations in selector:', error);
+        setIsLoading(false);
+      });
   }, []);
 
   useEffect(() => {
     if (selected) {
+      console.log('Station selector received selected station:', selected);
       const match = stations.find(s => s.id === selected.id || s.name === selected.name);
+      console.log('Found matching station:', match);
       setSearchTerm(match ? match.name : selected.name);
     } else {
       setSearchTerm('');

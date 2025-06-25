@@ -37,7 +37,11 @@ export default function WaterLevelAverages({ station }: Props) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!station) return;
+    if (!station) {
+      console.log('WaterLevelAverages: No station selected');
+      return;
+    }
+    console.log('WaterLevelAverages: Fetching data for station:', station.name, 'ID:', station.id);
     setLoading(true);
     fetchWaterLevelData(station.id)
       .then((data) => {

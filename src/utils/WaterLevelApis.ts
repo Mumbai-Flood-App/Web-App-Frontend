@@ -12,8 +12,6 @@ export async function fetchWaterStations() {
   }
   
   // Aurassure API
-  const API_BASE = 'https://api.mumbaiflood.in';
-
   const accessId = 'lX1d9akADFVLiYhB';
   const accessKey = 'NsKeyQDu9zgbED9KINEeYhIvRzbcSr1VKtDhbTMaUQMlAtPA8sOyjDm8Q85CBH9d';
 
@@ -30,13 +28,22 @@ export async function fetchWaterStations() {
     const data = await res.json();
     
     // Filter out sensors that don't work with the API keys (like in old React code)
-    const filteredThings = data.things.filter((sensor: any) => 
+    const filteredThings = data.things.filter((sensor: { id: number }) => 
       sensor.id !== 1447 && sensor.id !== 1451
     );
     
-    return filteredThings.map((sensor: any) => {
+    return filteredThings.map((sensor: { 
+      id: number; 
+      name: string; 
+      latitude: number; 
+      longitude: number; 
+      address: string; 
+      parameters?: Array<{ key: string; value: string }>;
+      status: string;
+      last_data_received_time: number;
+    }) => {
       // Extract current water level value
-      const waterLevelParam = sensor.parameters?.find((p: any) => p.key === 'us_mb');
+      const waterLevelParam = sensor.parameters?.find((p: { key: string }) => p.key === 'us_mb');
       const currentValue = waterLevelParam ? parseFloat(waterLevelParam.value) : 0;
       
       return {
@@ -85,13 +92,13 @@ export async function fetchWaterStations() {
           return data;
         }
       }
-    } catch (error) {
+    } catch {
       console.log('API data call failed, using fallback');
     }
 
     // Fallback: Create data from current sensor values
     const sensors = await fetchSensorList();
-    const sensor = sensors.find((s: any) => s.id === thingId);
+    const sensor = sensors.find((s: { id: number | string }) => s.id === thingId);
     
     if (!sensor) {
       throw new Error('Sensor not found');

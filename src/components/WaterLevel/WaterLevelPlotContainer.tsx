@@ -39,7 +39,7 @@ export default function WaterLevelPlotContainer({ sidebarOpen = true, mobile = f
     // Set default station on mount if not already selected
     if (!selectedStation) {
       fetchWaterStations().then((stations) => {
-        const defaultStation = stations.find((s: any) => s.name === "BMC's 8 MLD plant behind L&T");
+        const defaultStation = stations.find((s: { name: string }) => s.name === "BMC's 8 MLD plant behind L&T");
         if (defaultStation) setSelectedStation(defaultStation);
       });
     }

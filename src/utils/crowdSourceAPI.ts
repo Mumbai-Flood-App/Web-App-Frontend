@@ -13,7 +13,12 @@ export interface Coords {
   long: number;
 }
 
-export async function sendFormData(formData: FormData): Promise<any> {
+interface ApiResponse {
+  message: string;
+  [key: string]: unknown;
+}
+
+export async function sendFormData(formData: FormData): Promise<ApiResponse> {
   const res = await fetch('https://api.mumbaiflood.in/cs/data/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -23,7 +28,7 @@ export async function sendFormData(formData: FormData): Promise<any> {
   return res.json();
 }
 
-export async function fetchCrowdData(): Promise<any> {
+export async function fetchCrowdData(): Promise<ApiResponse> {
   const res = await fetch('https://api.mumbaiflood.in/cs/map/');
   if (!res.ok) throw new Error('Error fetching map data');
   return res.json();

@@ -13,6 +13,13 @@ interface Averages {
   avg24hr: number | null;
 }
 
+interface DataEntry {
+  time: number;
+  parameter_values: {
+    us_mb: number;
+  };
+}
+
 const intervals = [
   { label: 'Last 5 mins', key: 'avg5min', seconds: 5 * 60 },
   { label: 'Last 15 mins', key: 'avg15min', seconds: 15 * 60 },
@@ -28,29 +35,27 @@ export default function WaterLevelAverages({ station }: Props) {
     avg24hr: null 
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!station) return;
     setLoading(true);
-    setError(null);
     fetchWaterLevelData(station.id)
       .then((data) => {
         console.log('Fetched API data:', data);
         // Clean and process data
-        let cleanedData = (data.data || []).map((entry: any) => ({
+        const cleanedData = (data.data || []).map((entry: DataEntry) => ({
           ...entry,
           parameter_values: {
             ...entry.parameter_values,
             us_mb:
-              parseInt(entry.parameter_values.us_mb) > 300
+              parseInt(entry.parameter_values.us_mb.toString()) > 300
                 ? 0
-                : parseInt(entry.parameter_values.us_mb),
+                : parseInt(entry.parameter_values.us_mb.toString()),
           },
         }));
         console.log('Cleaned data:', cleanedData);
         if (cleanedData.length > 0) {
-          console.log('First 5 cleaned entries:', cleanedData.slice(0, 5).map((e: any) => ({ time: e.time, us_mb: e.parameter_values.us_mb })));
+          console.log('First 5 cleaned entries:', cleanedData.slice(0, 5).map((e: DataEntry) => ({ time: e.time, us_mb: e.parameter_values.us_mb })));
         }
         // Remove spikes
         for (let i = 1; i < cleanedData.length; i++) {
@@ -63,8 +68,8 @@ export default function WaterLevelAverages({ station }: Props) {
         }
         const now = Date.now() / 1000;
         const calculateAverage = (interval: number) => {
-          const filtered = cleanedData.filter((entry: any) => now - entry.time <= interval);
-          const sum = filtered.reduce((acc: number, val: any) => acc + val.parameter_values.us_mb, 0);
+          const filtered = cleanedData.filter((entry: DataEntry) => now - entry.time <= interval);
+          const sum = filtered.reduce((acc: number, val: DataEntry) => acc + val.parameter_values.us_mb, 0);
           return filtered.length > 0 ? sum / filtered.length : null;
         };
         setAverages({
@@ -75,9 +80,8 @@ export default function WaterLevelAverages({ station }: Props) {
         });
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setAverages({ avg5min: null, avg15min: null, avg12hr: null, avg24hr: null });
-        setError('Failed to fetch water level data');
         setLoading(false);
       });
   }, [station]);
@@ -85,7 +89,7 @@ export default function WaterLevelAverages({ station }: Props) {
   // Always show the grid, even if no station or no data
   return (
     <div className="w-full grid grid-cols-4 gap-3">
-      {intervals.map((interval, idx) => (
+      {intervals.map((interval) => (
         <div
           key={interval.key}
           className="flex flex-col items-center justify-center bg-black/70 backdrop-blur-[10px] rounded-lg shadow-md border border-gray-700 p-2 min-w-[70px] min-h-[60px] transition-all duration-150 hover:shadow-lg hover:bg-black/80"

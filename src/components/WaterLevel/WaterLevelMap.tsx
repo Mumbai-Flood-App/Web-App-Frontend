@@ -46,15 +46,6 @@ export default function WaterLevelMap() {
     }
   }, []);
 
-  const getColor = (rainfall: number) => {
-    if (rainfall > 204.4) return 'red';
-    if (rainfall > 115.5) return 'orange';
-    if (rainfall > 64.4) return 'yellow';
-    if (rainfall > 15.5) return 'skyblue';
-    if (rainfall > 0) return 'lightgreen';
-    return 'grey';
-  };
-
   return (
     <div
       className="md:fixed md:top-0 md:left-0 md:w-full md:h-screen relative w-full h-[75vh] z-0 overflow-visible"

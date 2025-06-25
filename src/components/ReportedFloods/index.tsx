@@ -4,11 +4,11 @@ import { fetchLocationData, sendFormData } from '../../utils/crowdSourceAPI';
 import dynamic from 'next/dynamic';
 
 interface FormProps {
-  setCsPinDropLocation?: (loc: any) => void;
-  csPinDropLocation?: any;
+  setCsPinDropLocation?: (loc: { lat: number; long: number } | null) => void;
+  csPinDropLocation?: { lat: number; long: number };
   setCsPinToggle?: (val: boolean) => void;
   csPinToggle?: boolean;
-  setZoomToLocation?: (loc: any) => void;
+  setZoomToLocation?: (loc: { lat: number; long: number; feet: number; inch: number }) => void;
 }
 
 const DynamicMapPicker = dynamic(() => import('./MapPinPicker'), { ssr: false });
@@ -54,7 +54,12 @@ const ReportedFloods: React.FC<FormProps> = ({
     const adjusted_feet = Math.floor(ajustedwaterlevel / 12);
     const adjusted_inches = ajustedwaterlevel % 12;
 
-    let data: any = {
+    let data: {
+      latitude: number | null;
+      longitude: number | null;
+      feet: number;
+      inch: number;
+    } = {
       latitude: null,
       longitude: null,
       feet: adjusted_feet,
@@ -71,7 +76,12 @@ const ReportedFloods: React.FC<FormProps> = ({
     sendData(data);
   };
 
-  const sendData = async (data: any) => {
+  const sendData = async (data: {
+    latitude: number | null;
+    longitude: number | null;
+    feet: number;
+    inch: number;
+  }) => {
     const sendata = {
       name: name,
       feet: data.feet,
@@ -91,8 +101,8 @@ const ReportedFloods: React.FC<FormProps> = ({
         setLocation('');
         setFeedback('');
         setZoomToLocation?.({
-          lat: data.latitude,
-          long: data.longitude,
+          lat: data.latitude || 0,
+          long: data.longitude || 0,
           feet: data.feet,
           inch: data.inch,
         });
@@ -102,7 +112,7 @@ const ReportedFloods: React.FC<FormProps> = ({
           'Thank you for your submission. Your data has been recorded successfully. You can view your submission on the map.'
         );
       }
-    } catch (error) {
+    } catch {
       setMessage('Error: Unable to store data.');
     }
   };
@@ -131,6 +141,14 @@ const ReportedFloods: React.FC<FormProps> = ({
           // ignore
         }
       );
+    }
+  };
+
+  const handlePinDropToggle = () => {
+    if (!gpslocation) {
+      setCsPinToggle?.(!csPinToggle);
+      setCsPinDropLocation?.(null);
+      setLocation('');
     }
   };
 

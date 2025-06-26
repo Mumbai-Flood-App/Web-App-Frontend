@@ -264,8 +264,8 @@ const ReportedFloods: React.FC<FormProps> = ({
           name="description"
           value={feedback}
           onChange={e => setFeedback(e.target.value)}
-          className="w-full border border-gray-600 rounded-lg px-3 py-2 text-base bg-gray-900/90 text-white placeholder-gray-400 mb-2 focus:outline-none focus:border-blue-500 transition-colors shadow-sm resize-none"
-          rows={2}
+          className="w-full border border-gray-600 rounded-lg px-3 py-2 text-base bg-gray-900/90 text-white placeholder-gray-400 mb-2 focus:outline-none focus:border-blue-500 transition-colors shadow-sm resize-y"
+          rows={4}
         ></textarea>
 
         <label htmlFor="name" className="text-white text-base font-medium mt-2 mb-1">Name:</label>

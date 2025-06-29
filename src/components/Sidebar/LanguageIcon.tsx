@@ -1,10 +1,6 @@
-import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
 const LanguageIcon = ({ open }: { open?: boolean }) => {
-  const pathname = usePathname();
-  const isActive = pathname === '/';
-
   return open ? (
     <div className="relative w-[200px] h-[36px]">
       <span className="absolute top-[8px] left-[49px] font-medium text-[#8dadff]">Language</span>
